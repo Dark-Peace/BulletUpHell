@@ -16,6 +16,8 @@ func _ready():
 	if not Engine.is_editor_hint():
 		a.add_track(Animation.TYPE_METHOD, 0)
 		a.track_set_path(0, self.get_path())
+		a.add_track(Animation.TYPE_METHOD, 1)
+		a.track_set_path(1, self.get_path())
 		assigned_animation = "Spawning"
 
 
@@ -167,60 +169,52 @@ func direct_spawn(bullets:Array, target:Node2D, activated:bool=true):
 	return bullets.duplicate()
 
 func plan_spawn(bullets:Array, spawn_delay:float=0):
-	var time
-	if a.length < current_animation_position+spawn_delay:
-		time = spawn_delay-(a.length-current_animation_position)
-	else: time = current_animation_position+spawn_delay
+	var key_data = getKeyTime(spawn_delay)
+	var time = key_data[0]; var track = key_data[1];
 	
-	var key = a.track_find_key(0, time, true)
+	var key = a.track_find_key(track, time, true)
 	if key > -1:
-		var args:Array = a.method_track_get_params(0,key)
+		var args:Array = a.method_track_get_params(track,key)
 		args[0].append_array(bullets)
-		a.track_insert_key(0, time, {"method": "_spawn_and_shoot", "args": args})
-	else: a.track_insert_key(0, time, {"method": "_spawn_and_shoot", "args": [bullets,[]]})
+		a.track_insert_key(track, time, {"method": "_spawn_and_shoot", "args": args})
+	else: a.track_insert_key(track, time, {"method": "_spawn_and_shoot", "args": [bullets,[]]})
 	
 	if current_animation != "Spawning" and a.track_get_key_count(0) > 0: play("Spawning")
-
 
 func plan_shoot(bullets:Array, shoot_delay:float=0):
-	var time
-	if a.length < current_animation_position+shoot_delay:
-		time = shoot_delay-(a.length-current_animation_position)
-	else: time = current_animation_position+shoot_delay
+	var key_data = getKeyTime(shoot_delay)
+	var time = key_data[0]; var track = key_data[1];
 	
-	var key = a.track_find_key(0, time, true)
+	var key = a.track_find_key(track, time, true)
 	if key > -1:
-		var args:Array = a.method_track_get_params(0,key)
+		var args:Array = a.method_track_get_params(track,key)
 		args[1].append_array(bullets)
-		a.track_insert_key(0, time, {"method": "_spawn_and_shoot", "args": args})
-	else: a.track_insert_key(0, time, {"method": "_spawn_and_shoot", "args": [[],bullets]})
+		a.track_insert_key(track, time, {"method": "_spawn_and_shoot", "args": args})
+	else: a.track_insert_key(track, time, {"method": "_spawn_and_shoot", "args": [[],bullets]})
 	
 	if current_animation != "Spawning" and a.track_get_key_count(0) > 0: play("Spawning")
 
+func getKeyTime(delay):
+	if a.length < current_animation_position+delay:
+		return [delay-(a.length-current_animation_position), 1]
+	else: return [current_animation_position+delay, 0]
 
 func _spawn_and_shoot(to_spawn:Array, to_shoot:Array):
 	_spawn(to_spawn)
 	_shoot(to_shoot)
 
 func _spawn(bullets:Array):
-	print(current_animation_position)
 	for b in bullets: b.activated = true
-	if current_animation and a.track_get_key_count(0) > 0:
-		print(a.track_get_key_count(0))
-		a.track_remove_key_at_position(0, current_animation_position)
-		print(a.track_get_key_count(0))
-		if a.track_get_key_count(0) == 0: stop()
 
 func _shoot(bullets:Array):
 	for b in bullets: b.shoot()
-	if current_animation and a.track_get_key_count(0) > 0:
-#		print(current_animation_position)
-		a.track_remove_key_at_position(0, current_animation_position)
-		if a.track_get_key_count(0) == 0: stop()
-		
 
 
-
+func reset_timeline(none):
+	a.remove_track(0)
+	a.add_track(Animation.TYPE_METHOD, 1)
+	a.track_set_path(1, self.get_path())
+	play("Spawning")
 
 
 

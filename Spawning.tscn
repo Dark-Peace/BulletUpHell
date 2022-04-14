@@ -4,8 +4,7 @@
 
 [sub_resource type="Animation" id=1]
 resource_name = "Spawning"
-length = 1000.0
-loop = true
+length = 999999.0
 step = 0.01
 
 [node name="SpawnerGlobal" type="AnimationPlayer"]
@@ -14,3 +13,5 @@ script = ExtResource( 1 )
 __meta__ = {
 "_editor_description_": ""
 }
+
+[connection signal="animation_finished" from="." to="." method="reset_timeline"]
