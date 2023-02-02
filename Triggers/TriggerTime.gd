@@ -1,7 +1,8 @@
+@icon("res://addons/BulletUpHell/Sprites/NodeIcons10.png")
 extends RichTextEffect
-class_name TriggerTime, "res://addons/BulletUpHell/Sprites/NodeIcons10.png"
+class_name TriggerTime
 
-export (float) var time = 0
+@export var time:float = 0
 
 func _init():
 	resource_name = "TrigTime"

@@ -1,9 +1,10 @@
+@icon("res://addons/BulletUpHell/Sprites/NodeIcons13.png")
 extends RichTextEffect
-class_name TriggerCollision, "res://addons/BulletUpHell/Sprites/NodeIcons13.png"
+class_name TriggerCollision
 
-export (String) var group_to_collide = "" # left empty for all
-export (NodePath) var target_to_collide
-export var on_bounce = false
+@export var group_to_collide:String = "" # left empty for all
+@export var target_to_collide:NodePath
+@export var on_bounce = false
 
 var node_collide:Node2D
 

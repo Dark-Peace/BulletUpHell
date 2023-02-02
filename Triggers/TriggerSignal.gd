@@ -1,7 +1,8 @@
+@icon("res://addons/BulletUpHell/Sprites/NodeIcons11.png")
 extends RichTextEffect
-class_name TriggerSignal, "res://addons/BulletUpHell/Sprites/NodeIcons11.png"
+class_name TriggerSignal
 
-export (String) var sig = ""
+@export var sig:String = ""
 
 func _init():
 	resource_name = "TrigSig"
