@@ -1,6 +1,7 @@
-tool
+@tool
+@icon("res://addons/BulletUpHell/Sprites/NodeIcons15.png")
 extends PackedDataContainer
-class_name BulletProps, "res://addons/BulletUpHell/Sprites/NodeIcons15.png"
+class_name BulletProps
 
 #enum SHAPE {standart=1, arrow=0, knife=2, marakas=21, tear=20, mask=-1, anger_shot=-2, explo_standart=4}
 #enum EMO {NO, joy, anxiety, cold_anger
@@ -50,7 +51,7 @@ var spec_modulate_loop:float = 0.0
 var spec_rotating_speed = 0.0
 var spec_trail_length:float = 0.0
 var spec_trail_width:float = 0.0
-var spec_trail_modulate:Color = Color.white
+var spec_trail_modulate:Color = Color.WHITE
 
 ## triggers
 var trigger_container:String
@@ -60,7 +61,7 @@ var trigger_wait_for_shot = true
 enum GROUP_SELECT{Nearest_on_homing,Nearest_on_spawn,Nearest_on_shoot,Nearest_anywhen,Random}
 enum LIST_BEHAVIOUR{Stop, Loop, Reverse}
 enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, List}
-var homing_type:int = TARGET_TYPE.Nodepath setget set_homing_type
+var homing_type:int = TARGET_TYPE.Nodepath : set = set_homing_type
 var homing_target:NodePath = NodePath()
 var homing_special_target:String
 var homing_group:String
@@ -143,26 +144,26 @@ enum RANDTYPE{List, Variation}
 func set_homing_type(value):
 	homing_type = value
 	_get_property_list()
-	property_list_changed_notify()
+	notify_property_list_changed()
 
 func _get_property_list() -> Array:
 	var PL1 = [{
 			name = "speed",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "scale",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "angle",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "-3.1416, 3.1416",
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "groups",
-			type = TYPE_STRING_ARRAY,
+			type = TYPE_PACKED_STRING_ARRAY,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Animations",
@@ -238,15 +239,15 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "spec_modulate_loop",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "spec_trail_length",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "spec_trail_width",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "spec_trail_modulate",
@@ -254,7 +255,7 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "spec_rotating_speed",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Destruction",
@@ -263,7 +264,7 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_GROUP
 		},{
 			name = "death_after_time",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "death_outside_box",
@@ -302,7 +303,7 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "a_speed_multi_scale",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Triggers",
@@ -379,15 +380,15 @@ func _get_property_list() -> Array:
 	
 	var PL2 = [{
 			name = "homing_steer",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "homing_time_start",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "homing_duration",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Laser Beam",
@@ -396,11 +397,11 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_GROUP
 		},{
 			name = "beam_length_per_ray",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "beam_width",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "beam_bounce_amount",
@@ -425,7 +426,7 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "scale_multi_scale",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Random",
@@ -433,7 +434,7 @@ func _get_property_list() -> Array:
 			hint_string = "r_",
 			usage = PROPERTY_USAGE_GROUP
 		},
-		{ name = "r_randomisation_chances", type = TYPE_REAL,
+		{ name = "r_randomisation_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_speed_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_speed_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
@@ -444,7 +445,7 @@ func _get_property_list() -> Array:
 		{ name = "r_group_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_bounce_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_bounce_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_no_coll_chances", type = TYPE_REAL,
+		{ name = "r_no_coll_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_modulate_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_trail_length_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
@@ -452,7 +453,7 @@ func _get_property_list() -> Array:
 		{ name = "r_rotating_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_death_after_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_death_after_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_death_outside_chances", type = TYPE_REAL,
+		{ name = "r_death_outside_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_dir_equation_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_curve_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
@@ -460,7 +461,7 @@ func _get_property_list() -> Array:
 		{ name = "r_speed_multi_iter_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_speed_multi_scale_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_trigger_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_wait_for_shot_chances", type = TYPE_REAL,
+		{ name = "r_wait_for_shot_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_homing_target_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_special_target_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
@@ -480,10 +481,10 @@ func _get_property_list() -> Array:
 		{ name = "r_scale_multi_iter_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_scale_multi_scale_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT }
 		]
-#	if not r_random_array.empty():
+#	if not r_random_array.is_empty():
 #		for p in r_random_array.keys():
 #			PL.append({name=p,type=typeof(r_random_array[p]),usage=PROPERTY_USAGE_DEFAULT})
-#	property_list_changed_notify()
+#	notify_property_list_changed()
 	return PL1+PL_homing+PL2
 
 #func _set(p:String, value) -> bool:
@@ -494,5 +495,5 @@ func _get_property_list() -> Array:
 #			RANDTYPE.Variation: r_random_array["r_"+r_property_name] = int(3)
 ##	if p in r_random_array:
 ##		r_random_array[p] = value
-#	property_list_changed_notify()
+#	notify_property_list_changed()
 #	return p in self

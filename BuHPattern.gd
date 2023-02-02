@@ -1,10 +1,10 @@
-tool
+@tool
 extends Path2D
 
-export (String) var id = ""
-export (NavigationPolygon) var pattern
-export (bool) var preview_spawn = false
-export (bool) var preview_shoot = false setget set_pre_shoot
+@export var id:String = ""
+@export var pattern:NavigationPolygon
+@export var preview_spawn:bool = false
+@export var preview_shoot:bool = false : set = set_pre_shoot
 
 var preview_bullet:BulletProps
 
@@ -24,8 +24,8 @@ func _ready():
 				var pos_on_curve
 				if pattern.closed_shape: pos_on_curve = length/pattern.nbr*b
 				else: pos_on_curve = length/(pattern.nbr-1)*b
-				follow.offset = pos_on_curve
-				pattern.pos.append(pattern.shape.interpolate_baked(pos_on_curve).rotated(pattern.pattern_angle)-pattern.center_pos)
+				follow.h_offset = pos_on_curve
+				pattern.pos.append(pattern.shape.sample_baked(pos_on_curve).rotated(pattern.pattern_angle)-pattern.center_pos)
 				pattern.angles.append(follow.rotation-PI/2)
 			remove_child(follow)
 			
@@ -57,7 +57,7 @@ func _ready():
 ##			print(p["name"])
 #			P = p["name"]
 #			if P in ["__data__","spec_top_level","spec_ally","spec_states","a_angular_equation","mask",
-#					"Reference","Resource","resource_local_to_scene","resource_path","Resource", "node_container",
+#					"RefCounted","Resource","resource_local_to_scene","resource_path","Resource", "node_container",
 #					"resource_name","PackedDataContainer","script","Script Variables","homing_position",
 #					"Advanced Movement","Advanced Scale","Animations","Homing","Special Properties","Triggers"]:
 #						continue
@@ -87,7 +87,7 @@ func _ready():
 
 func _process(delta):
 	if preview_spawn and Engine.is_editor_hint():
-		update()
+		queue_redraw()
 #	if pattern != null and pattern.resource_name == "PatternCustomPoints" and pattern.calculate_angles == pattern.ANGLE_TYPE.Custom:
 #		print(pattern.angles)
 #		while curve.get_point_count() > pattern.angles.size():
@@ -105,27 +105,28 @@ func _draw():
 			follow = PathFollow2D.new()
 			add_child(follow)
 			
-		draw_circle(pattern.center_pos, 10, Color.yellow)
+		draw_circle(pattern.center_pos, 10, Color.YELLOW)
 		for b in pattern.nbr:
 			var pos_on_curve
 			if pattern.closed_shape: pos_on_curve = length/pattern.nbr*b
 			else: pos_on_curve = length/(pattern.nbr-1)*b
-			var pos = curve.interpolate_baked(pos_on_curve)
-			draw_circle(pos, 10, Color.red)
+			var pos = curve.sample_baked(pos_on_curve)
+			draw_circle(pos, 10, Color.RED)
 			
 			if preview_shoot:
-				follow.offset = pos_on_curve
-				draw_line(pos, pos+Vector2(32,0).rotated(follow.rotation-PI/2),Color.yellow,3)
+				follow.h_offset = pos_on_curve
+				draw_line(pos, pos+Vector2(32,0).rotated(follow.rotation-PI/2),Color.YELLOW,3)
 	#			var points = curve.get_baked_points()
 	#			for p in points.size():
 	#				points.set(p, points[p])
-	#			draw_polyline(points, Color.red, 2.0)
+	#			draw_polyline(points, Color.RED, 2.0)
 		if preview_shoot:
 			remove_child(follow)
 	elif pattern.resource_name in ["PatternCustomPoints"]:
-		draw_circle(pattern.center_pos, 10, Color.yellow)
-		for p in curve.get_point_count():
-			draw_string(Label.new().get_font(""), curve.get_point_position(p), String(p), Color.red)
+		draw_circle(pattern.center_pos, 10, Color.YELLOW)
+#		for p in curve.get_point_count(): #TODO PORT GODOT 4
+#			draw_string(Label.new().get_font(""), curve.get_point_position(p), str(p), color=Color.RED)
+#			draw_string()
 
 
 func area_pooling():
@@ -134,13 +135,13 @@ func area_pooling():
 	for i in pattern.pooling:
 		pattern.pos.append([])
 		for j in pattern.nbr:
-			maybe_pos = Vector2(rand_range(pattern.limit_rect.position.x,pattern.limit_rect.size.x),\
-								rand_range(pattern.limit_rect.position.y,pattern.limit_rect.size.y))
+			maybe_pos = Vector2(randf_range(pattern.limit_rect.position.x,pattern.limit_rect.size.x),\
+								randf_range(pattern.limit_rect.position.y,pattern.limit_rect.size.y))
 			tries = pattern.tries_max
-			while tries > 0 and not Geometry.is_point_in_polygon(maybe_pos, pattern.polygon):
+			while tries > 0 and not Geometry2D.is_point_in_polygon(maybe_pos, pattern.polygon):
 				tries -= 1
-				maybe_pos = Vector2(rand_range(pattern.limit_rect.position.x,pattern.limit_rect.size.x),\
-									rand_range(pattern.limit_rect.position.y,pattern.limit_rect.size.y))
+				maybe_pos = Vector2(randf_range(pattern.limit_rect.position.x,pattern.limit_rect.size.x),\
+									randf_range(pattern.limit_rect.position.y,pattern.limit_rect.size.y))
 			pattern.pos[i].append(maybe_pos-pattern.center_pos)
 
 func grid_spawning():
@@ -149,7 +150,7 @@ func grid_spawning():
 	for x in (pattern.limit_rect.size.x-pattern.limit_rect.position.x)/pattern.grid_spawning.x:
 		for y in (pattern.limit_rect.size.y-pattern.limit_rect.position.y)/pattern.grid_spawning.y:
 			maybe_pos = pattern.limit_rect.position+Vector2(pattern.grid_spawning.x*x,pattern.grid_spawning.y*y)
-			if Geometry.is_point_in_polygon(maybe_pos, pattern.polygon):
+			if Geometry2D.is_point_in_polygon(maybe_pos, pattern.polygon):
 				pattern.pos[0].append(maybe_pos-pattern.center_pos)
 	pattern.nbr = pattern.pos[0].size()
 	pattern.pooling = 1
@@ -163,4 +164,4 @@ func curve_to_polygon():
 		if point.x > pattern.limit_rect.size.x: pattern.limit_rect.size.x = point.x
 		if point.y < pattern.limit_rect.position.y: pattern.limit_rect.position.y = point.y
 		if point.y > pattern.limit_rect.size.y: pattern.limit_rect.size.y = point.y
-	pattern.polygon = PoolVector2Array(poly)
+	pattern.polygon = PackedVector2Array(poly)

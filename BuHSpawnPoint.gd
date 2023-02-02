@@ -1,4 +1,4 @@
-tool
+@tool
 extends Node2D
 
 
@@ -11,7 +11,7 @@ var trigger_container:NodePath
 
 var trig_container
 var trigger_counter = 0
-var trig_timeout = false
+var trigger_timeout = false
 var trig_collider
 var trig_signal
 
@@ -37,25 +37,25 @@ func _ready():
 		
 		if auto_start_on_cam:
 			assert(auto_pattern_id != "")
-			var instance = VisibilityNotifier2D.new()
-			instance.connect("screen_entered", self, "on_screen", [true])
-			instance.connect("screen_exited", self, "on_screen", [false])
-		elif auto_distance_from: set_process(true)
+			var instance = VisibleOnScreenNotifier2D.new()
+			instance.connect("screen_entered",Callable(self,"on_screen").bind(true))
+			instance.connect("screen_exited",Callable(self,"on_screen").bind(false))
+		elif auto_distance_from != NodePath(): set_process(true)
 		elif auto_pattern_id:
 			if auto_start_after_time > float(0.0):
-				yield(get_tree().create_timer(auto_start_after_time), "timeout")
+				await get_tree().create_timer(auto_start_after_time).timeout
 			auto_call = true
 			set_process(active)
 	
 	if active and auto_pattern_id:
 		if auto_start_after_time > float(0.0):
-			yield(get_tree().create_timer(auto_start_after_time), "timeout")
+			await get_tree().create_timer(auto_start_after_time).timeout
 		auto_call = true
 		set_process(active)
 
 func _process(delta):
 	if not Engine.is_editor_hint():
-		if auto_distance_from and global_position.distance_to(get_node(auto_distance_from).global_position) <= auto_start_at_distance:
+		if auto_distance_from != NodePath() and global_position.distance_to(get_node(auto_distance_from).global_position) <= auto_start_at_distance:
 			active = true
 		checkTrigger()
 		
@@ -66,7 +66,7 @@ func _process(delta):
 
 func on_screen(is_on):
 	if is_on and auto_start_after_time > float(0.0):
-		yield(get_tree().create_timer(auto_start_after_time), "timeout")
+		await get_tree().create_timer(auto_start_after_time).timeout
 	active = is_on
 	set_process(active)
 
@@ -75,7 +75,7 @@ func triggerSignal(sig):
 	checkTrigger()
 
 func trig_timeout():
-	trig_timeout = true
+	trigger_timeout = true
 	checkTrigger()
 
 func checkTrigger():
@@ -93,7 +93,7 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "rotating_speed",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "Autostart & Triggering",
@@ -110,11 +110,11 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "auto_start_after_time",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "auto_start_at_distance",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "auto_distance_from",
@@ -135,9 +135,9 @@ func _get_property_list() -> Array:
 			hint_string = "r_",
 			usage = PROPERTY_USAGE_GROUP
 		},
-		{ name = "r_randomisation_chances", type = TYPE_REAL,
+		{ name = "r_randomisation_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_active_chances", type = TYPE_REAL,
+		{ name = "r_active_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_shared_area_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_rotating_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },

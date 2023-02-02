@@ -1,10 +1,10 @@
-tool
+@tool
 extends Node
 
-export (String) var id
-export (String, MULTILINE) var advanced_controls = ""
-export (Array, RichTextEffect) var triggers = [null]
-export (Array, NavigationPolygon) var patterns = [null]
+@export var id:String
+@export_multiline var advanced_controls:String = ""
+@export var triggers:Array[RichTextEffect] = [null]
+@export var patterns:Array[NavigationPolygon] = [null]
 
 var commands:Array = []
 
@@ -16,8 +16,8 @@ func _ready():
 				i.node_collide = get_node(i.target_to_collide)
 			elif i.resource_name == "TrigPos" and i.target:
 				i.node_target = get_node(i.target)
-			Spawning.new_trigger(id+"/"+String(triggers.find(i)), i)
-		for j in patterns.size(): Spawning.new_pattern(id+"/"+String(j), patterns[j])
+			Spawning.new_trigger(id+"/"+str(triggers.find(i)), i)
+		for j in patterns.size(): Spawning.new_pattern(id+"/"+str(j), patterns[j])
 		Spawning.new_container(self)
 		
 		if advanced_controls != "":
@@ -30,7 +30,7 @@ func define_trigger(res:Array, t:String, b:Dictionary, rid:RID):
 	var curr_t = Spawning.trigger(id+"/"+t)
 	if not res.has(curr_t.resource_name): res.append(curr_t.resource_name)
 	if curr_t.resource_name == "TrigTime":
-		get_tree().create_timer(curr_t.time).connect("timeout", Spawning,"trig_timeout", [b, rid])
+		get_tree().create_timer(curr_t.time).connect("timeout",Callable(Spawning,"trig_timeout").bind(b, rid))
 
 
 func getCurrentTriggers(b:Dictionary, rid:RID):

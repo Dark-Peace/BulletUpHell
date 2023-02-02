@@ -1,54 +1,59 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=7 format=3 uid="uid://gixop20d1d75"]
 
-[ext_resource path="res://addons/BulletUpHell/BuHSpawner.gd" type="Script" id=1]
-[ext_resource path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_3.png" type="Texture" id=2]
+[ext_resource type="Script" path="res://addons/BulletUpHell/BuHSpawner.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://ctmnf87a0uhnm" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_3.png" id="2_3slxn"]
 
-[sub_resource type="Curve" id=4]
-_data = [ Vector2( 0, 0.501305 ), 0.0, 0.880193, 0, 1, Vector2( 0.244176, 0.716227 ), 2.21406, 2.21406, 0, 0, Vector2( 0.515975, 1 ), -0.239755, -0.239755, 0, 0, Vector2( 0.76004, 0.723903 ), -2.76758, -2.76758, 0, 0, Vector2( 1, 0.501305 ), -1.40458, 0.0, 0, 0 ]
+[sub_resource type="Curve" id="4"]
+_data = [Vector2(0, 0.501305), 0.0, 0.880193, 0, 1, Vector2(0.244176, 0.716227), 2.21406, 2.21406, 0, 0, Vector2(0.515975, 1), -0.239755, -0.239755, 0, 0, Vector2(0.76004, 0.723903), -2.76758, -2.76758, 0, 0, Vector2(1, 0.501305), -1.40458, 0.0, 0, 0]
+point_count = 5
 
-[sub_resource type="SpriteFrames" id=1]
-animations = [ {
-"frames": [ ExtResource( 2 ) ],
+[sub_resource type="SpriteFrames" id="1"]
+animations = [{
+"frames": [],
 "loop": true,
-"name": "0",
+"name": &"",
 "speed": 5.0
-} ]
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_3slxn")
+}],
+"loop": true,
+"name": &"0",
+"speed": 5.0
+}]
 
-[sub_resource type="CircleShape2D" id=2]
+[sub_resource type="CircleShape2D" id="2"]
 
-[sub_resource type="ConvexPolygonShape2D" id=3]
-points = PoolVector2Array( 0, 0 )
+[sub_resource type="ConvexPolygonShape2D" id="3"]
+points = PackedVector2Array(0, 0)
 
 [node name="BulletHellManager" type="Node2D"]
 z_index = 999
-script = ExtResource( 1 )
-__meta__ = {
-"_editor_description_": ""
-}
+script = ExtResource("1")
 cull_margin = 250
 cull_trigger = false
 cull_partial_move = false
-rand_variation_list = [ SubResource( 4 ) ]
+rand_variation_list = Array[Curve]([SubResource("4")])
 
 [node name="SharedAreas" type="Node2D" parent="."]
 
 [node name="0" type="Area2D" parent="SharedAreas"]
 
-[node name="ShapeManager" type="AnimatedSprite" parent="."]
-frames = SubResource( 1 )
-animation = "0"
+[node name="ShapeManager" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("1")
+animation = &""
 
 [node name="0" type="CollisionShape2D" parent="ShapeManager"]
-shape = SubResource( 2 )
+shape = SubResource("2")
 
 [node name="LaserBeam" type="CollisionShape2D" parent="ShapeManager"]
-shape = SubResource( 3 )
+shape = SubResource("3")
 
 [node name="SFX" type="Node2D" parent="."]
 
-[node name="Bouncy" type="KinematicBody2D" parent="."]
+[node name="Bouncy" type="CharacterBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Bouncy"]
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
-cast_to = Vector2( 0, 0 )

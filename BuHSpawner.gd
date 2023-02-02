@@ -1,27 +1,28 @@
 extends Node2D
 
 const STANDARD_BULLET_RADIUS = 5
-export var cull_bullets = true						# deletes bullets offscreen
-export var cull_except_for:String					# except for those props IDs
+@export var cull_bullets = true						# deletes bullets offscreen
+@export var cull_except_for:String					# except for those props IDs
 var no_culling_for = []
-export var cull_margin = STANDARD_BULLET_RADIUS*10
-export var cull_trigger = true						# desactivates triggers offscreen
-export var cull_partial_move = true					# continues to calculate position but doesn't move until onscreen
-export var cull_minimum_speed_required = 200		# bullet with speed under won't get culled
+@export var cull_margin = STANDARD_BULLET_RADIUS*10
+@export var cull_trigger = true						# desactivates triggers offscreen
+@export var cull_partial_move = true				# continues to calculate position but doesn't move until onscreen
+@export var cull_minimum_speed_required = 200		# bullet with speed under won't get culled
 
-export (Array, AudioStream) var sfx_list = []
-export (Array, Curve) var rand_variation_list = []
+@export var sfx_list:Array[AudioStream] = []
+@export var rand_variation_list:Array[Curve] = []
 
 var arrayProps = {}
 var arrayTriggers = {}
 var arrayPatterns = {}
 var arrayContainers = {}
-onready var textures = $ShapeManager.frames
-onready var arrayShapes = {} # format: id={shape, offset, rotation}
-onready var viewrect = get_viewport().get_visible_rect().grow(cull_margin)
+@onready var textures = $ShapeManager.sprite_frames
+@onready var arrayShapes = {} # format: id={shape, offset, rotation}
+@onready var viewrect = get_viewport().get_visible_rect().grow(cull_margin)
+
 
 var poolBullets = {}
-const Phys = Physics2DServer
+var Phys = PhysicsServer2D
 enum BState{Unactive,Spawning,Spawned,Shooting,Moving,QueuedFree}
 # list of target nodes
 const UNACTIVE_ZONE = Vector2(99999,99999)
@@ -46,7 +47,7 @@ enum SYMTYPE{ClosedShape,Line}
 enum CURVE_TYPE{None,LoopFromStart,OnceThenDie,OnceThenStay,LoopFromEnd}
 enum LIST_ENDS{Stop, Loop, Reverse}
 
-var FONT = Label.new().get_font("")
+#var FONT = Label.new().get_font("")
 
 # DEFINE SPECIAL TARGETS HERE
 var ST_Player = null
@@ -62,8 +63,8 @@ func _ready():
 	no_culling_for = cull_except_for.split(";",false)
 	for a in $SharedAreas.get_children():
 		assert(a is Area2D)
-		a.connect("area_shape_entered", self, "bullet_collide_area", [a])
-		a.connect("body_shape_entered", self, "bullet_collide_body", [a])
+		a.connect("area_shape_entered",Callable(self,"bullet_collide_area").bind(a))
+		a.connect("body_shape_entered",Callable(self,"bullet_collide_body").bind(a))
 	$Bouncy.global_position = UNACTIVE_ZONE
 	var instance
 	for s in sfx_list:
@@ -81,14 +82,14 @@ func _ready():
 func _process(delta: float) -> void:
 	_delta = delta
 	viewrect = get_viewport().get_visible_rect().grow(cull_margin)
-	update()
+	queue_redraw()
 
 func _physics_process(delta: float) -> void:
-	if not poolBullets.empty(): bullet_movement(delta)
+	if not poolBullets.is_empty(): bullet_movement(delta)
 	
 	time += delta
 	if time == loop_length: time = 0
-	while not poolQueue.empty() and poolTimes[0] < time:
+	while not poolQueue.is_empty() and poolTimes[0] < time:
 		next_in_queue = poolQueue[0]
 		match next_in_queue[0]:
 			ACTION_SPAWN: _spawn(next_in_queue[1])
@@ -125,7 +126,7 @@ func container(id:String):
 
 
 func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionary):
-	if pattern.forced_target != "":
+	if pattern.forced_target != NodePath():
 		if pattern.forced_pattern_lookat: queued_instance["rotation"] = pos.angle_to(pattern.node_target.global_position)
 		else: queued_instance["rotation"] = (pattern.node_target.global_position-queued_instance["global_position"]).angle()
 	elif pattern.forced_angle != 0.0:
@@ -148,7 +149,7 @@ func spawn(target, id:String, shared_area="0"):
 				pos = target["position"]
 				ori_angle = target["rotation"]
 			else: push_error("target isn't a Node2D or a bullet RID")
-			 
+			
 			bullet_props = arrayProps[pattern.bullet]
 			if bullet_props.get("has_random",false): bullet_props = create_random_props(bullet_props)
 #			print(pattern.nbr)
@@ -244,38 +245,38 @@ func spawn(target, id:String, shared_area="0"):
 						else: plan_shoot([b], pattern.cooldown_next_spawn*(to_spawn.size())+pattern.cooldown_shoot+idx*pattern.cooldown_next_shoot)
 			
 			bullets.clear()
-			if l < pattern.layer_nbr-1: yield(get_tree().create_timer(pattern.layer_cooldown_spawn), "timeout")
+			if l < pattern.layer_nbr-1: await get_tree().create_timer(pattern.layer_cooldown_spawn).timeout
 		if iter > 0: iter -= 1
-		yield(get_tree().create_timer(pattern.cooldown_spawn), "timeout")
+		await get_tree().create_timer(pattern.cooldown_spawn).timeout
 
 
 func create_shape(shared_rid:RID, ColID:String, init:bool=false) -> RID:
 	var new_shape:RID
 	var template_shape = arrayShapes[ColID][0]
 	if template_shape is CircleShape2D:
-		 new_shape = Phys.circle_shape_create()
-		 Phys.shape_set_data(new_shape, template_shape.radius)
+		new_shape = Phys.circle_shape_create()
+		Phys.shape_set_data(new_shape, template_shape.radius)
 	elif template_shape is CapsuleShape2D:
-		 new_shape = Phys.capsule_shape_create()
-		 Phys.shape_set_data(new_shape, [template_shape.radius,template_shape.height])
+		new_shape = Phys.capsule_shape_create()
+		Phys.shape_set_data(new_shape, [template_shape.radius,template_shape.height])
 	elif template_shape is ConcavePolygonShape2D:
-		 new_shape = Phys.concave_polygon_shape_create()
-		 Phys.shape_set_data(new_shape, template_shape.segments)
+		new_shape = Phys.concave_polygon_shape_create()
+		Phys.shape_set_data(new_shape, template_shape.segments)
 	elif template_shape is ConvexPolygonShape2D:
-		 new_shape = Phys.convex_polygon_shape_create()
-		 Phys.shape_set_data(new_shape, template_shape.points)
-	elif template_shape is LineShape2D:
-		 new_shape = Phys.line_shape_create()
-		 Phys.shape_set_data(new_shape, [template_shape.d,template_shape.normal])
-	elif template_shape is RayShape2D:
-		 new_shape = Phys.ray_shape_create()
-		 Phys.shape_set_data(new_shape, [template_shape.length,template_shape.slips_on_slope])
+		new_shape = Phys.convex_polygon_shape_create()
+		Phys.shape_set_data(new_shape, template_shape.points)
+	elif template_shape is WorldBoundaryShape2D:
+		new_shape = Phys.line_shape_create()
+		Phys.shape_set_data(new_shape, [template_shape.d,template_shape.normal])
+	elif template_shape is SeparationRayShape2D:
+		new_shape = Phys.ray_shape_create()
+		Phys.shape_set_data(new_shape, [template_shape.length,template_shape.slide_on_slope])
 	elif template_shape is RectangleShape2D:
-		 new_shape = Phys.rectangle_shape_create()
-		 Phys.shape_set_data(new_shape, template_shape.extents)
+		new_shape = Phys.rectangle_shape_create()
+		Phys.shape_set_data(new_shape, template_shape.extents)
 	elif template_shape is SegmentShape2D:
-		 new_shape = Phys.segment_shape_create()
-		 Phys.shape_set_data(new_shape, [template_shape.a,template_shape.b])
+		new_shape = Phys.segment_shape_create()
+		Phys.shape_set_data(new_shape, [template_shape.a,template_shape.b])
 		
 	Phys.area_add_shape(shared_rid, new_shape, \
 		Transform2D(arrayShapes[ColID][2],arrayShapes[ColID][1]+(UNACTIVE_ZONE*int(init))))
@@ -359,11 +360,11 @@ func _shoot(bullets:Array):
 		
 		if B["props"].has("homing_target") or B["props"].has("node_homing"):
 			if B["props"].get("homing_time_start",0) > 0:
-				get_tree().create_timer(B["props"]["homing_time_start"]).connect("timeout", self, "_on_Homing_timeout", [B,true])
+				get_tree().create_timer(B["props"]["homing_time_start"]).connect("timeout",Callable(self,"_on_Homing_timeout").bind(B,true))
 			else: _on_Homing_timeout(B,true)
 		if B["props"].get("homing_select_in_group",-1) == GROUP_SELECT.Nearest_on_shoot:
 			target_from_options(B)
-		elif not B["props"].get("homing_list",[]).empty(): target_from_list(B)
+		elif not B["props"].get("homing_list",[]).is_empty(): target_from_list(B)
 		
 		if not change_animation(B,"shoot",b): B["state"] = BState.Shooting
 		if B["props"].has("anim_shoot_sfx"): $SFX.get_child(B["props"]["anim_shoot_sfx"]).play()
@@ -429,15 +430,15 @@ func _draw():
 					elif b["state"] == BState.Spawning:
 						b["state"] = BState.Spawned
 						change_animation(b, "waiting",B)
-			texture = textures.get_frame(b["texture"],b["anim_frame"])
-		else: texture = textures.get_frame(b["texture"],0)
+			texture = textures.get_frame_texture(b["texture"],b["anim_frame"])
+		else: texture = textures.get_frame_texture(b["texture"],0)
 		
 		draw_set_transform(b["position"], b["rotation"]+b.get("rot_index",0),b.get("scale",Vector2(1,1)))
 		if b["props"].has("beam_length_per_ray"):
-			draw_multiline(Phys.shape_get_data(B), Color.red)#,b["props"]["beam_width"])
+			draw_multiline(Phys.shape_get_data(B), Color.RED)#,b["props"]["beam_width"])
 		elif b["props"].has("spec_modulate"):
 			if b["props"].has("spec_modulate_loop"):
-				draw_texture(texture,-texture.get_size()/2,b["props"]["spec_modulate"].interpolate(b["modulate_index"]))
+				draw_texture(texture,-texture.get_size()/2,b["props"]["spec_modulate"].sample(b["modulate_index"]))
 				b["modulate_index"] = b["modulate_index"]+(_delta/b["props"]["spec_modulate_loop"])
 				if b["modulate_index"] >= 1: b["modulate_index"] = 0
 			else: draw_texture(texture,-texture.get_size()/2,b["props"]["spec_modulate"].get_color(0))
@@ -550,7 +551,7 @@ func switch_property_of_all(replaceby_id:String, replaced_id:String="__ALL__"):
 
 func random_remove(id:String, prop:String):
 	var res = bullet(id)
-	res.remove(prop)
+	res.remove_at(prop)
 
 func random_change(type:String, id:String, prop:String, new_value):
 	var res = call_deferred(type, id)
@@ -597,7 +598,7 @@ func get_choice_array(list:Array):
 	return list[randi()%list.size()]
 
 func edit_special_target(var_name:String, path:Node2D):
-	set_meta("ST_"+var_name, path) # set path to null to remove meta variable
+	set_meta("ST_"+var_name, path) # set path to null to remove_at meta variable
 
 func get_special_target(var_name:String):
 	return get_meta("ST_"+var_name)
@@ -650,9 +651,9 @@ func make_laser(points:Array, B:RID, width:float):
 		else: angle = points[point-1].angle_to_point(points[point+1])+PI/2
 		array.append(points[point]+Vector2(width,0).rotated(angle))
 		array2.append(points[point]-Vector2(width,0).rotated(angle))
-	array2.invert()
+	array2.reverse()
 	array.append_array(array2)
-	Phys.shape_set_data(B, PoolVector2Array(array))
+	Phys.shape_set_data(B, PackedVector2Array(array))
 
 func bullet_movement(delta:float):
 	var props
@@ -674,10 +675,10 @@ func bullet_movement(delta:float):
 		#scale curve
 		if B.get("scale_multi_iter",0) != 0:
 			B["scale_interpolate"] += delta
-			var _scale = props["scale"]*props["scale_multiplier"].interpolate(B["scale_interpolate"]/props["scale_multi_scale"])
+			var _scale = props["scale"]*props["scale_multiplier"].sample(B["scale_interpolate"]/props["scale_multi_scale"])
 			B["scale"] = Vector2(_scale,_scale)
 			if B["scale_interpolate"]/props["scale_multi_scale"] >= 1 and props["scale_multi_iterations"] != -1:
-				 B["scale_multi_iter"] -= 1
+				B["scale_multi_iter"] -= 1
 				
 		if B["state"] == BState.Spawned:
 			B["position"] = B["source_node"].global_position + B["spawn_pos"]
@@ -686,15 +687,15 @@ func bullet_movement(delta:float):
 				B["trail_counter"] += _delta
 				if B["trail_counter"] >= props["spec_trail_length"]:
 					B["trail_counter"] = 0
-					B["trail"].remove(3)
+					B["trail"].remove_at(3)
 					B["trail"].insert(0, B["position"])
 				
 			#speed curve
 			if B.get("speed_multi_iter",0) != 0:
 				B["speed_interpolate"] += delta
-				B["speed"] = props["a_speed_multiplier"].interpolate(B["speed_interpolate"]/props["a_speed_multi_scale"])
+				B["speed"] = props["a_speed_multiplier"].sample(B["speed_interpolate"]/props["a_speed_multi_scale"])
 				if B["speed_interpolate"]/props["a_speed_multi_scale"] >= 1 and props["a_speed_multi_iterations"] != -1:
-					 B["speed_multi_iter"] -= 1
+					B["speed_multi_iter"] -= 1
 
 			#direction from math equation
 			if props.get("a_direction_equation","") != "":
@@ -720,18 +721,18 @@ func bullet_movement(delta:float):
 								LIST_ENDS.Loop: B["homing_counter"] = 0
 								LIST_ENDS.Reverse:
 									B["homing_counter"] = 0
-									props["homing_list"].invert()
+									props["homing_list"].reverse()
 								LIST_ENDS.Stop: B["homing_target"] = null
 						target_from_list(B, false)
 					else: B["homing_target"] = null
 					
 				B["vel"] += ((target_pos-B["position"]).normalized()*B["speed"]-B["vel"]).normalized()*props["homing_steer"]*delta
-				B["vel"] = B["vel"].clamped(B["speed"])
+				B["vel"] = B["vel"].clamp(B["speed"])
 				B["rotation"] = B["vel"].angle()
 			
 			# follow path2D
 			if props.get("curve"):
-				B["position"] = B["spawn_pos"]+(props["curve"].interpolate_baked(B["curve_counter"]*B["speed"])-B["curve_start"]).rotated(B["rotation"])
+				B["position"] = B["spawn_pos"]+(props["curve"].sample_baked(B["curve_counter"]*B["speed"])-B["curve_start"]).rotated(B["rotation"])
 				B["curve_counter"] += delta
 				if B["curve_counter"]*B["speed"] >= props["curve"].get_baked_length(): #TODO check if correct
 					match props["a_curve_movement"]:
@@ -767,7 +768,7 @@ func _on_Homing_timeout(B:Dictionary, start:bool):
 		if props.has("homing_target") or props.has("node_homing"): B["homing_target"] = props["node_homing"]
 		else: B["homing_target"] = props["homing_position"]
 		if props["homing_duration"] > 0:
-			get_tree().create_timer(props["homing_duration"]).connect("timeout", self, "_on_Homing_timeout", [B,false])
+			get_tree().create_timer(props["homing_duration"]).connect("timeout",Callable(self,"_on_Homing_timeout").bind(B,false))
 		if props.get("homing_select_in_group",-1) == GROUP_SELECT.Nearest_on_homing:
 			target_from_options(B)
 		elif props.get("homing_select_in_group",-1) == GROUP_SELECT.Random:
@@ -795,7 +796,7 @@ func target_from_group(B:Dictionary, random:bool=false):
 func target_from_segments(B:Dictionary, random:bool=false):
 	var dist = INF; var res; var new_res; var new_dist
 	for p in B["homing_surface"].size():
-		new_res = Geometry.get_closest_point_to_segment(B["position"], B["homing_surface"][p], B["homing_surface"][(p+1)%B["homing_surface"].size()])
+		new_res = Geometry2D.get_closest_point_to_segment(B["position"], B["homing_surface"][p], B["homing_surface"][(p+1)%B["homing_surface"].size()])
 		new_dist = B["position"].distance_to(new_res)
 		if new_dist < dist or (random and randi()%2 == 0):
 			dist = new_dist
@@ -828,8 +829,8 @@ func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape
 		B["bounces"] = max(0, B["bounces"]-1)
 	elif body.is_in_group("Slime"): bounce(B, shared_area)
 #		var space:RID = Phys.space_create()
-#		var state:Physics2DDirectSpaceState = Phys.space_get_direct_state(space)
-#		var param:Physics2DShapeQueryParameters = Physics2DShapeQueryParameters.new()
+#		var state:PhysicsDirectSpaceState2D = Phys.space_get_direct_state(space)
+#		var param:PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
 #		param.shape_rid = rid
 #		print(state.intersect_ray(B["position"],B["position"]+B["vel"]*_delta))
 #		var rest_info:Dictionary = state.get_rest_info(param)
@@ -878,7 +879,7 @@ func create_random_props(original:Dictionary) -> Dictionary:
 		elif original.has(r_name+"_variation"):
 			res[p] = get_variation(original[p],variation.x,variation.y,variation.z)
 		elif original.has(r_name+"_chance"):
-			res[p] = rand_range(0,1) < original[r_name+"_chance"]
+			res[p] = randf_range(0,1) < original[r_name+"_chance"]
 	return res
 
 func match_rand_prop(original:String) -> String:

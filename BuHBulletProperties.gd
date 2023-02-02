@@ -1,8 +1,8 @@
-tool
+@tool
 extends Path2D
 
-export (String) var id = ""
-export (PackedDataContainer) var props
+@export var id:String = ""
+@export var props:PackedDataContainer
 
 
 func _ready():
@@ -18,11 +18,11 @@ func _ready():
 			props.curve = curve
 		
 		var dict:Dictionary = {}; var P; var has_random:bool=false;
-		var allow_random:bool = rand_range(0,1) <= props["r_randomisation_chances"];
+		var allow_random:bool = randf_range(0,1) <= props.get("r_randomisation_chances");
 		for p in props.get_property_list():
 			P = p["name"]
 			if P in ["__data__","spec_top_level","spec_ally","a_angular_equation","mask","r_randomisation_chances",
-				"Reference","Resource","resource_local_to_scene","resource_path","Resource","node_container",
+				"RefCounted","Resource","resource_local_to_scene","resource_path","Resource","node_container",
 				"resource_name","PackedDataContainer","script","Script Variables","homing_position", "homing_list_ordered",
 				"Advanced Movement","Advanced Scale","Animations","Homing","Special Properties","Triggers"]:
 					continue
@@ -37,7 +37,7 @@ func _ready():
 			elif P == "homing_target" and props.get(P) == NodePath(): continue
 			elif P == "homing_position" and props.get(P) == Vector2(): continue
 			elif P in ["spec_modulate","curve"] and props.get(P) == null: continue
-			elif P in ["homing_list","homing_surface"] and props.get(P).empty(): continue
+			elif P in ["homing_list","homing_surface"] and props.get(P).is_empty(): continue
 			
 			elif P in ["homing_steer","homing_time_start","homing_duration","node_homing"] \
 				and not ((dict.get("homing_target",false) or dict.get("homing_position",false)) \
@@ -58,8 +58,8 @@ func _ready():
 				if not allow_random or \
 				(p["type"] == TYPE_STRING and props.get(P) == "") or \
 				(p["type"] == TYPE_VECTOR3 and props.get(P) == Vector3()) or \
-				(p["type"] == TYPE_REAL and props.get(P) == 0.0) or \
-				(p["type"] == TYPE_ARRAY and props.get(P).empty()): continue
+				(p["type"] == TYPE_FLOAT and props.get(P) == 0.0) or \
+				(p["type"] == TYPE_ARRAY and props.get(P).is_empty()): continue
 				
 				if p["type"] == TYPE_STRING: props.set(P, Array(props.get(P).split(";",false)))
 				
