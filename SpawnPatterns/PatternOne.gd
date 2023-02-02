@@ -1,6 +1,7 @@
-tool
+@tool
+@icon("res://addons/BulletUpHell/Sprites/NodeIcons8.png")
 extends NavigationPolygon
-class_name PatternOne, "res://addons/BulletUpHell/Sprites/NodeIcons8.png"
+class_name PatternOne
 
 var bullet:String = ""
 var nbr:int = 1
@@ -79,7 +80,7 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_GROUP
 		},{
 			name = "forced_angle",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "-3.1416, 3.1416",
 			usage = PROPERTY_USAGE_DEFAULT 
@@ -117,19 +118,19 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "cooldown_spawn",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "cooldown_shoot",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "cooldown_next_spawn",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "cooldown_next_shoot",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "Wait",
@@ -161,19 +162,19 @@ func _get_property_list() -> Array:
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "layer_cooldown_spawn",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "layer_pos_offset",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "layer_speed_offset",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "layer_angle_offset",
-			type = TYPE_REAL,
+			type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "-3.1416, 3.1416",
 			usage = PROPERTY_USAGE_DEFAULT 
@@ -183,21 +184,21 @@ func _get_property_list() -> Array:
 			hint_string = "r_",
 			usage = PROPERTY_USAGE_GROUP
 		},
-		{ name = "r_randomisation_chances", type = TYPE_REAL,
+		{ name = "r_randomisation_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_bullet_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_bullet_nbr_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_bullet_nbr_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_pattern_angle_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_pattern_angle_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_infinite_iter_chances", type = TYPE_REAL,
+		{ name = "r_infinite_iter_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_iterations_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_iterations_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_forced_angle_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_forced_angle_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_forced_target_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_stasis_chances", type = TYPE_REAL,
+		{ name = "r_stasis_chances", type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_cooldown_spawn_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_cooldown_spawn_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
