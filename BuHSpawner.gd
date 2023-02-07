@@ -164,7 +164,7 @@ func spawn(target, id:String, shared_area="0"):
 				queued_instance["speed"] = bullet_props.speed + pattern.layer_speed_offset*l
 				queued_instance["vel"] = Vector2()
 				queued_instance["source_node"] = target
-				queued_instance["groups"] = bullet_props["groups"]
+				if bullet_props.has("groups"): queued_instance["groups"] = bullet_props.get("groups")
 				if pattern.follows_parent: queued_instance["follows_parent"] = true
 				
 				match pattern.resource_name:
@@ -173,7 +173,7 @@ func spawn(target, id:String, shared_area="0"):
 						queued_instance["spawn_pos"] = Vector2(cos(angle)*pattern.radius,sin(angle)*pattern.radius).rotated(pattern.pattern_angle)
 						queued_instance["rotation"] = angle + bullet_props.angle + pattern.layer_angle_offset*l
 					"PatternLine":
-						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center_pos-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
+						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
 						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + pattern.pattern_angle
 					"PatternOne":
 						queued_instance["spawn_pos"] = Vector2()
@@ -433,7 +433,7 @@ func _draw():
 			texture = textures.get_frame_texture(b["texture"],b["anim_frame"])
 		else: texture = textures.get_frame_texture(b["texture"],0)
 		
-		draw_set_transform(b["position"], b["rotation"]+b.get("rot_index",0),b.get("scale",Vector2(1,1)))
+		draw_set_transform(b["position"], b["rotation"]+b.get("rot_index",0),b.get("scale",Vector2(b["props"]["scale"],b["props"]["scale"])))
 		if b["props"].has("beam_length_per_ray"):
 			draw_multiline(Phys.shape_get_data(B), Color.RED)#,b["props"]["beam_width"])
 		elif b["props"].has("spec_modulate"):
@@ -566,18 +566,23 @@ func random_set(type:String, id:String, value:bool):
 		"bullet": res["has_random"] = value
 
 func add_group_to_bullet(b:Dictionary, group:String):
-	b["groups"].append(group)
+	if b.has("groups"): b["groups"].append(group)
+	else: b["groups"] = [group]
 
 func remove_group_from_bullet(b:Dictionary, group:String):
+	if not b.has("groups"): return
 	b["groups"].erase(group)
 
 func clear_groups_from_bullet(b:Dictionary):
-	b["groups"] = []
+	b.erase("groups")
+#	b["groups"] = []
 
 func is_bullet_in_group(b:Dictionary, group:String):
+	if not b.has("groups"): return false
 	return b["groups"].has(group)
 
 func is_bullet_in_grouptype(b:Dictionary, grouptype:String):
+	if not b.has("groups"): return false
 	for g in b["groups"]:
 		if not grouptype in g: continue
 		return true
@@ -706,10 +711,11 @@ func bullet_movement(delta:float):
 				B["curve"] = expression.execute([B["curveDir_index"]])*100
 			
 			#homing
-			if B.get("homing_target"):
+			if B.has("homing_target"):
 				var target_angle:float
 				var target_pos:Vector2
-				if typeof(B["homing_target"]) == TYPE_OBJECT: target_pos = B["homing_target"].global_position
+				if typeof(B["homing_target"]) == TYPE_OBJECT:
+					target_pos = B["homing_target"].global_position
 				else: target_pos = B["homing_target"]
 				target_angle = B["position"].angle_to(target_pos)
 				if B["position"].distance_to(target_pos) < HOMING_MARGIN:
@@ -727,14 +733,14 @@ func bullet_movement(delta:float):
 					else: B["homing_target"] = null
 					
 				B["vel"] += ((target_pos-B["position"]).normalized()*B["speed"]-B["vel"]).normalized()*props["homing_steer"]*delta
-				B["vel"] = B["vel"].clamp(B["speed"])
+				B["vel"] = B["vel"].clamp(Vector2(0,0), Vector2(B["speed"],B["speed"]))
 				B["rotation"] = B["vel"].angle()
 			
 			# follow path2D
 			if props.get("curve"):
 				B["position"] = B["spawn_pos"]+(props["curve"].sample_baked(B["curve_counter"]*B["speed"])-B["curve_start"]).rotated(B["rotation"])
 				B["curve_counter"] += delta
-				if B["curve_counter"]*B["speed"] >= props["curve"].get_baked_length(): #TODO check if correct
+				if B["curve_counter"]*B["speed"] >= props["curve"].get_baked_length():
 					match props["a_curve_movement"]:
 						CURVE_TYPE.LoopFromStart: B["curve_counter"] = 0
 						CURVE_TYPE.LoopFromEnd:
@@ -760,7 +766,8 @@ func bullet_movement(delta:float):
 		for b in Phys.area_get_shape_count(shared_rid):
 			B = poolBullets[get_RID_from_index(shared_rid,b)]
 			if B["state"] == BState.Unactive or check_move_culling(B): continue
-			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0),B["position"]).scaled(B.get("scale",Vector2(1,1))))
+			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0),B["position"]).scaled(B.get("scale",Vector2(props["scale"],props["scale"]))))
+			
 
 func _on_Homing_timeout(B:Dictionary, start:bool):
 	if start:

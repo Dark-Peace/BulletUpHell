@@ -24,20 +24,22 @@ func _ready():
 			if P in ["__data__","spec_top_level","spec_ally","a_angular_equation","mask","r_randomisation_chances",
 				"RefCounted","Resource","resource_local_to_scene","resource_path","Resource","node_container",
 				"resource_name","PackedDataContainer","script","Script Variables","homing_position", "homing_list_ordered",
-				"Advanced Movement","Advanced Scale","Animations","Homing","Special Properties","Triggers"]:
+				"Advanced Movement","Advanced Scale","Animations","Homing","Special Properties","Triggers",
+				"Destruction","Laser Beam", "BulletProps.gd", "Random"]:
 					continue
 			elif P in ["a_direction_equation","trigger_container", "anim_spawn_texture","anim_waiting_texture",\
 				"anim_delete_texture","anim_spawn_collision","anim_waiting_collision","anim_delete_collision",\
 				"homing_special_target","homing_group"] and props.get(P) == "": continue
-			elif P in ["a_speed_multi_iterations","scale_multi_iterations","spec_bounces","spec_rotating_speed", \
-				"spec_warn","spec_explo","spec_modulate_loop","beam_length_per_ray","spec_trail_length"] \
+			elif P in ["a_speed_multi_iterations","scale_multi_iterations","spec_bounces","spec_rotating_speed", "homing_type", \
+				"spec_warn","spec_explo","spec_modulate_loop","beam_length_per_ray","spec_trail_length","a_curve_movement"] \
 				and int(props.get(P)) == int(0): continue
 			elif P in ["anim_idle_sfx","anim_spawn_sfx","anim_waiting_sfx","anim_delete_sfx"] and props.get(P) == -1: continue
 			elif P in ["spec_tourment","spec_no_collision"] and props.get(P) == false: continue
 			elif P == "homing_target" and props.get(P) == NodePath(): continue
 			elif P == "homing_position" and props.get(P) == Vector2(): continue
 			elif P in ["spec_modulate","curve"] and props.get(P) == null: continue
-			elif P in ["homing_list","homing_surface"] and props.get(P).is_empty(): continue
+			elif P in ["homing_list","homing_surface","groups"] and props.get(P).is_empty(): continue
+			elif P == "death_outside_box" and props.get(P) == Rect2(): continue
 			
 			elif P in ["homing_steer","homing_time_start","homing_duration","node_homing"] \
 				and not ((dict.get("homing_target",false) or dict.get("homing_position",false)) \
@@ -71,5 +73,6 @@ func _ready():
 				props.set(P, Array(props.get(P).split(";",false)))
 			dict[P] = props.get(P)
 		Spawning.new_bullet(id, dict)
+		print(dict)
 		queue_free()
 	elif not props: props = BulletProps.new()
