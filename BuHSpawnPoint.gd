@@ -28,6 +28,7 @@ var r_start_time_choice:String
 var r_start_time_variation:Vector3
 
 var auto_call = false
+var can_respawn = true
 
 func _ready():
 	if not Engine.is_editor_hint():
@@ -52,6 +53,9 @@ func _ready():
 			await get_tree().create_timer(auto_start_after_time).timeout
 		auto_call = true
 		set_process(active)
+		
+	if rotating_speed > 0:
+		set_process(active)
 
 func _process(delta):
 	if not Engine.is_editor_hint():
@@ -59,9 +63,12 @@ func _process(delta):
 			active = true
 		checkTrigger()
 		
-		if auto_call and active and auto_pattern_id:
-			set_process(false)
+		if can_respawn and auto_call and active and auto_pattern_id:
 			Spawning.spawn(self, auto_pattern_id, shared_area_name)
+			can_respawn = false
+			if not rotating_speed > 0: set_process(false)
+		
+		rotate(rotating_speed)
 
 
 func on_screen(is_on):

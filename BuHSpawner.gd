@@ -171,19 +171,19 @@ func spawn(target, id:String, shared_area="0"):
 					"PatternCircle":
 						angle = (pattern.angle_total/pattern.nbr)*i + pattern.angle_decal + pattern.layer_pos_offset*l
 						queued_instance["spawn_pos"] = Vector2(cos(angle)*pattern.radius,sin(angle)*pattern.radius).rotated(pattern.pattern_angle)
-						queued_instance["rotation"] = angle + bullet_props.angle + pattern.layer_angle_offset*l
+						queued_instance["rotation"] = angle + bullet_props.angle + pattern.layer_angle_offset*l + ori_angle
 					"PatternLine":
 						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
-						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + pattern.pattern_angle
+						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + pattern.pattern_angle + ori_angle
 					"PatternOne":
 						queued_instance["spawn_pos"] = Vector2()
-						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l
+						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + ori_angle
 					"PatternCustomShape","PatternCustomPoints":
 						queued_instance["spawn_pos"] = pattern.points[i]
-						queued_instance["rotation"] = bullet_props.angle + pattern.angles[i] + pattern.layer_angle_offset*l
+						queued_instance["rotation"] = bullet_props.angle + pattern.angles[i] + pattern.layer_angle_offset*l + ori_angle
 					"PatternCustomArea":
 						queued_instance["spawn_pos"] = pattern.pos[randi()%pattern.pooling][i]
-						queued_instance["rotation"] = bullet_props.angle
+						queued_instance["rotation"] = bullet_props.angle + ori_angle
 				set_angle(pattern, pos, queued_instance)
 				bullets.append(bID)
 				poolBullets[bID] = queued_instance
