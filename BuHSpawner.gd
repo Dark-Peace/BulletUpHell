@@ -686,7 +686,8 @@ func bullet_movement(delta:float):
 				B["scale_multi_iter"] -= 1
 				
 		if B["state"] == BState.Spawned:
-			B["position"] = B["source_node"].global_position + B["spawn_pos"]
+			if B["source_node"] is Dictionary: B["position"] = B["spawn_pos"] + B["source_node"]["position"]
+			else: B["position"] = B["source_node"].global_position + B["spawn_pos"]
 		elif B["state"] == BState.Moving:
 			if B.has("trail_counter"):
 				B["trail_counter"] += _delta
