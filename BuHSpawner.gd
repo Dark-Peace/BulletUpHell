@@ -1,17 +1,23 @@
+@tool
 extends Node2D
 
 const STANDARD_BULLET_RADIUS = 5
-@export var cull_bullets = true						# deletes bullets offscreen
-@export var cull_except_for:String					# except for those props IDs
+
+## Optimisation culling
+var cull_bullets = true						# deletes bullets offscreen
+var cull_except_for:String					# except for those props IDs
 var no_culling_for = []
-@export var cull_margin = STANDARD_BULLET_RADIUS*10
-@export var cull_trigger = true						# desactivates triggers offscreen
-@export var cull_partial_move = true				# continues to calculate position but doesn't move until onscreen
-@export var cull_minimum_speed_required = 200		# bullet with speed under won't get culled
+var cull_margin = STANDARD_BULLET_RADIUS*10
+var cull_trigger = true						# desactivates triggers offscreen
+var cull_partial_move = true				# continues to calculate position but doesn't move until onscreen
+var cull_minimum_speed_required = 200		# bullet with speed under won't get culled
+var cull_fixed_screen = false
 
-@export var sfx_list:Array[AudioStream] = []
-@export var rand_variation_list:Array[Curve] = []
+## Resource data
+var sfx_list:Array[AudioStream] = []
+var rand_variation_list:Array[Curve] = []
 
+##
 var arrayProps = {}
 var arrayTriggers = {}
 var arrayPatterns = {}
@@ -54,6 +60,8 @@ var ST_Player = null
 
 
 func _ready():
+	if Engine.is_editor_hint(): return
+	
 	randomize()
 	$ShapeManager.hide()
 	for s in $ShapeManager.get_children():
@@ -65,6 +73,7 @@ func _ready():
 		assert(a is Area2D)
 		a.connect("area_shape_entered",Callable(self,"bullet_collide_area").bind(a))
 		a.connect("body_shape_entered",Callable(self,"bullet_collide_body").bind(a))
+		a.set_meta("ShapeCount", 0)
 	$Bouncy.global_position = UNACTIVE_ZONE
 	var instance
 	for s in sfx_list:
@@ -80,11 +89,17 @@ func _ready():
 #		pooling.append(_circle_shape)
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint(): return
+	
 	_delta = delta
-	viewrect = get_viewport().get_visible_rect().grow(cull_margin)
+	if not cull_fixed_screen:
+		viewrect = Rect2(-get_canvas_transform().get_origin()/get_canvas_transform().get_scale(), \
+							get_viewport_rect().size/get_canvas_transform().get_scale())
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint(): return
+	
 	if not poolBullets.is_empty(): bullet_movement(delta)
 	
 	time += delta
@@ -137,6 +152,7 @@ func spawn(target, id:String, shared_area="0"):
 	var bullets:Array
 	var pattern = arrayPatterns[id]
 	var iter = pattern.iterations
+	var shared_area_node = $SharedAreas.get_node(shared_area)
 	
 	var pos:Vector2; var ori_angle:float;
 	var bullet_props; var angle; var queued_instance; var bID;
@@ -153,9 +169,10 @@ func spawn(target, id:String, shared_area="0"):
 			bullet_props = arrayProps[pattern.bullet]
 			if bullet_props.get("has_random",false): bullet_props = create_random_props(bullet_props)
 #			print(pattern.nbr)
+			shared_area_node.set_meta("ShapeCount", shared_area_node.get_meta("ShapeCount")+pattern.nbr) # Warning, bad sync possible ?
 			for i in pattern.nbr:
 				queued_instance = {}
-				queued_instance["shared_area"] = $SharedAreas.get_node(shared_area)
+				queued_instance["shared_area"] = shared_area_node
 				queued_instance["colID"] = bullet_props.get("anim_spawn_collision", bullet_props["anim_idle_collision"])
 				bID = create_shape(queued_instance["shared_area"].get_rid(), queued_instance["colID"]) #TODO random
 				queued_instance["state"] = BState.Unactive
@@ -411,6 +428,8 @@ func init_special_variables(b:Dictionary, rid:RID):
 
 
 func _draw():
+	if Engine.is_editor_hint(): return
+	
 	var texture
 	var b
 	for B in poolBullets.keys():
@@ -435,7 +454,7 @@ func _draw():
 		
 		draw_set_transform(b["position"], b["rotation"]+b.get("rot_index",0),b.get("scale",Vector2(b["props"]["scale"],b["props"]["scale"])))
 		if b["props"].has("beam_length_per_ray"):
-			draw_multiline(Phys.shape_get_data(B), Color.RED)#,b["props"]["beam_width"])
+			draw_multiline(Phys.shape_get_data(B), Color.RED)#,b["props"]["beam_width"]) #Warning TODO Remove phys get
 		elif b["props"].has("spec_modulate"):
 			if b["props"].has("spec_modulate_loop"):
 				draw_texture(texture,-texture.get_size()/2,b["props"]["spec_modulate"].sample(b["modulate_index"]))
@@ -510,7 +529,9 @@ func clear_all_offscreen_bullets():
 	for b in poolBullets.keys(): check_bullet_culling(poolBullets[b],b)
 
 func delete_bullet(b:RID):
-	if poolBullets[b]["props"].has("anim_delete_sfx"): $SFX.get_child(poolBullets[b]["props"]["anim_delete_sfx"]).play()
+	var B = poolBullets[b]
+	if B["props"].has("anim_delete_sfx"): $SFX.get_child(B["props"]["anim_delete_sfx"]).play()
+	B["shared_area"].set_meta("ShapeCount", B["shared_area"].get_meta("ShapeCount")-1)
 	poolBullets.erase(b)
 	Phys.free_rid(b)
 
@@ -670,7 +691,7 @@ func bullet_movement(delta:float):
 		props = B["props"]
 		
 		if B.has("death_counter"):
-			B["death_counter"] += _delta
+			B["death_counter"] += delta
 			if B["death_counter"] >= props["death_after_time"]:
 				delete_bullet(b)
 				continue
@@ -764,7 +785,7 @@ func bullet_movement(delta:float):
 	var shared_rid:RID
 	for area in $SharedAreas.get_children():
 		shared_rid = area.get_rid()
-		for b in Phys.area_get_shape_count(shared_rid):
+		for b in area.get_meta("ShapeCount"):#Phys.area_get_shape_count(shared_rid):
 			B = poolBullets[get_RID_from_index(shared_rid,b)]
 			if B["state"] == BState.Unactive or check_move_culling(B): continue
 			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0),B["position"]).scaled(B.get("scale",Vector2(props["scale"],props["scale"]))))
@@ -925,5 +946,49 @@ func match_rand_prop(original:String) -> String:
 		"": return "r_"
 	return ""
 
+
+func _get_property_list() -> Array:
+	return [{
+			name = "sfx_list",
+			type = TYPE_ARRAY,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "rand_variation_list",
+			type = TYPE_ARRAY,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "Culling",
+			type = TYPE_NIL,
+			hint_string = "cull_",
+			usage = PROPERTY_USAGE_GROUP
+		},{
+			name = "cull_bullets",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "cull_except_for",
+			type = TYPE_STRING,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "cull_margin",
+			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "cull_trigger",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "cull_partial_move",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "cull_minimum_speed_required",
+			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "cull_fixed_screen",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT 
+		}]
 
 
