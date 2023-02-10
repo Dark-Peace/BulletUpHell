@@ -33,8 +33,11 @@ var cooldown_next_shoot:float = 0
 
 enum LATENCE {stay, move, spin, follow, target}
 var wait_latence = LATENCE.stay
-enum RELEASE {direct, momentum}
-var release = RELEASE.direct
+enum MOMENTUM{None, TRANS_LINEAR,TRANS_SINE,TRANS_QUINT,TRANS_QUART,TRANS_QUAD,TRANS_EXPO,TRANS_ELASTIC,TRANS_CUBIC, \
+				TRANS_CIRC,TRANS_BOUNCE,TRANS_BACK}
+var wait_tween_momentum:MOMENTUM = MOMENTUM.None
+var wait_tween_length:float = 0
+var wait_tween_time:float = 0
 
 var layer_nbr:int = 1
 var layer_cooldown_spawn:float = 0
@@ -190,10 +193,18 @@ func _get_property_list() -> Array:
 			hint_string = LATENCE,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
-			name = "wait_release",
+			name = "wait_tween_momentum",
 			type = TYPE_INT,
 			hint = PROPERTY_HINT_ENUM,
-			hint_string = RELEASE,
+			hint_string = MOMENTUM,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "wait_tween_length",
+			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "wait_tween_time",
+			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "Layers",
