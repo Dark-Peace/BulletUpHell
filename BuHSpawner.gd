@@ -74,7 +74,6 @@ func _ready():
 		a.connect("area_shape_entered",Callable(self,"bullet_collide_area").bind(a))
 		a.connect("body_shape_entered",Callable(self,"bullet_collide_body").bind(a))
 		a.set_meta("ShapeCount", 0)
-		a.set_meta("InactiveShapes", [])
 	$Bouncy.global_position = UNACTIVE_ZONE
 	var instance
 	for s in sfx_list:
@@ -107,6 +106,18 @@ func _physics_process(delta: float) -> void:
 		poolQueue.pop_front()
 		poolTimes.pop_front()
 
+func change_scene_to_file(file:String):
+	reset_bullets()
+	get_tree().change_scene_to_file(file)
+	
+func change_scene_to_packed(scene:PackedScene):
+	reset_bullets()
+	get_tree().change_scene_to_packed(scene)
+	
+func reset_bullets():
+	clear_all_bullets()
+
+
 func new_trigger(id:String, t:RichTextEffect):
 	assert(not arrayTriggers.has(id))
 	arrayTriggers[id] = t
@@ -137,27 +148,27 @@ func container(id:String):
 
 func create_pool(bullet:String, shared_area:String, amount:int):
 	var shared_rid:RID = get_shared_area_rid(shared_area)
-	rid_create_pool(bullet, shared_rid, amount)
-
-func rid_create_pool(bullet:String, shared_rid:RID, amount:int):
 	var colID:String = arrayProps[bullet].get("anim_spawn_collision", arrayProps[bullet]["anim_idle_collision"])
 	if not inactive_pool.has(bullet):
 		inactive_pool[bullet] = []
 		inactive_pool["__SIZE__"+bullet] = 0
 	for i in amount:
-		inactive_pool[bullet].append(create_shape(shared_rid, colID))
+		inactive_pool[bullet].append([create_shape(shared_rid, colID), shared_area])
 	inactive_pool["__SIZE__"+bullet] += amount
 
-func wake_from_pool(bullet:String, queued_instance:Dictionary):
+func wake_from_pool(bullet:String, queued_instance:Dictionary, shared_area:String):
 	if inactive_pool[bullet].is_empty():
 		push_warning("WARNING : bullet pool for bullet of ID "+bullet+" is empty. Create bigger one next time to avoid lag.")
-		rid_create_pool(bullet, queued_instance["shared_area"].get_rid(), max(inactive_pool["__SIZE__"+bullet]/10, 50))
-	var bID:RID = inactive_pool[bullet].pop_front()
+		create_pool(bullet, queued_instance["shared_area"].name, max(inactive_pool["__SIZE__"+bullet]/10, 50))
+		
+	var i:int = 0
+	while inactive_pool[bullet][i][1] != shared_area: i += 1
+	var bID:RID = inactive_pool[bullet].pop_at(i)[0]
 	poolBullets[bID] = queued_instance
 	return bID
 
 func back_to_grave(bullet:String, bID:RID):
-	inactive_pool[bullet].append(bID)
+	inactive_pool[bullet].append([bID, poolBullets[bID]["shared_area"].name])
 	poolBullets.erase(bID)
 
 
@@ -204,7 +215,7 @@ func spawn(target, id:String, shared_area="0"):
 				queued_instance["source_node"] = target
 				if bullet_props.has("groups"): queued_instance["groups"] = bullet_props.get("groups")
 				if pattern.follows_parent: queued_instance["follows_parent"] = true
-				bID = wake_from_pool(pattern.bullet, queued_instance)
+				bID = wake_from_pool(pattern.bullet, queued_instance, shared_area)
 				
 				match pattern.resource_name:
 					"PatternCircle":
