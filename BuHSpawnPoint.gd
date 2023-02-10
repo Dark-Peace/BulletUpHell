@@ -18,6 +18,7 @@ var trig_signal
 var rotating_speed = 0.0
 var active = true
 var shared_area_name = "0"
+var pool_amount:int = 50
 
 var r_randomisation_chances:float
 var r_active_chances:float
@@ -54,21 +55,23 @@ func _ready():
 		auto_call = true
 		set_process(active)
 		
-	if rotating_speed > 0:
-		set_process(active)
+	if rotating_speed > 0: set_process(active)
+	
+	if active and pool_amount > 0:
+		Spawning.create_pool(Spawning.pattern(auto_pattern_id)["bullet"], shared_area_name, pool_amount)
 
 func _process(delta):
-	if not Engine.is_editor_hint():
-		if auto_distance_from != NodePath() and global_position.distance_to(get_node(auto_distance_from).global_position) <= auto_start_at_distance:
-			active = true
-		checkTrigger()
-		
-		if can_respawn and auto_call and active and auto_pattern_id:
-			Spawning.spawn(self, auto_pattern_id, shared_area_name)
-			can_respawn = false
-			if not rotating_speed > 0: set_process(false)
-		
-		rotate(rotating_speed)
+	if Engine.is_editor_hint(): return
+	if auto_distance_from != NodePath() and global_position.distance_to(get_node(auto_distance_from).global_position) <= auto_start_at_distance:
+		active = true
+	checkTrigger()
+	
+	if can_respawn and auto_call and active and auto_pattern_id:
+		Spawning.spawn(self, auto_pattern_id, shared_area_name)
+		can_respawn = false
+		if not rotating_speed > 0: set_process(false)
+	
+	rotate(rotating_speed)
 
 
 func on_screen(is_on):
@@ -101,6 +104,10 @@ func _get_property_list() -> Array:
 		},{
 			name = "rotating_speed",
 			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
+			name = "pool_amount",
+			type = TYPE_INT,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "Autostart & Triggering",

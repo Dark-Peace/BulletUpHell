@@ -34,7 +34,7 @@ enum BState{Unactive,Spawning,Spawned,Shooting,Moving,QueuedFree}
 const UNACTIVE_ZONE = Vector2(99999,99999)
 
 # pooling
-var pooling:Array = []
+var inactive_pool:Dictionary = {}
 const ACTION_SPAWN = 0
 const ACTION_SHOOT = 1
 const ACTION_BOTH = 2
@@ -74,19 +74,13 @@ func _ready():
 		a.connect("area_shape_entered",Callable(self,"bullet_collide_area").bind(a))
 		a.connect("body_shape_entered",Callable(self,"bullet_collide_body").bind(a))
 		a.set_meta("ShapeCount", 0)
+		a.set_meta("InactiveShapes", [])
 	$Bouncy.global_position = UNACTIVE_ZONE
 	var instance
 	for s in sfx_list:
 		instance = AudioStreamPlayer.new()
 		instance.stream = s
 		$SFX.call_deferred("add_child",instance)
-
-#func create_pool():
-#	var _circle_shape
-#	for i in 4000:
-#		_circle_shape = Phys.circle_shape_create()
-#		Phys.shape_set_data(_circle_shape, 8)
-#		pooling.append(_circle_shape)
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint(): return
@@ -140,6 +134,33 @@ func container(id:String):
 	return arrayContainers[id]
 
 
+
+func create_pool(bullet:String, shared_area:String, amount:int):
+	var shared_rid:RID = get_shared_area_rid(shared_area)
+	rid_create_pool(bullet, shared_rid, amount)
+
+func rid_create_pool(bullet:String, shared_rid:RID, amount:int):
+	var colID:String = arrayProps[bullet].get("anim_spawn_collision", arrayProps[bullet]["anim_idle_collision"])
+	if not inactive_pool.has(bullet):
+		inactive_pool[bullet] = []
+		inactive_pool["__SIZE__"+bullet] = 0
+	for i in amount:
+		inactive_pool[bullet].append(create_shape(shared_rid, colID))
+	inactive_pool["__SIZE__"+bullet] += amount
+
+func wake_from_pool(bullet:String, queued_instance:Dictionary):
+	if inactive_pool[bullet].is_empty():
+		push_warning("WARNING : bullet pool for bullet of ID "+bullet+" is empty. Create bigger one next time to avoid lag.")
+		rid_create_pool(bullet, queued_instance["shared_area"].get_rid(), max(inactive_pool["__SIZE__"+bullet]/10, 50))
+	var bID:RID = inactive_pool[bullet].pop_front()
+	poolBullets[bID] = queued_instance
+	return bID
+
+func back_to_grave(bullet:String, bID:RID):
+	inactive_pool[bullet].append(bID)
+	poolBullets.erase(bID)
+
+
 func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionary):
 	if pattern.forced_target != NodePath():
 		if pattern.forced_pattern_lookat: queued_instance["rotation"] = pos.angle_to(pattern.node_target.global_position)
@@ -174,7 +195,7 @@ func spawn(target, id:String, shared_area="0"):
 				queued_instance = {}
 				queued_instance["shared_area"] = shared_area_node
 				queued_instance["colID"] = bullet_props.get("anim_spawn_collision", bullet_props["anim_idle_collision"])
-				bID = create_shape(queued_instance["shared_area"].get_rid(), queued_instance["colID"]) #TODO random
+#				bID = create_shape(queued_instance["shared_area"].get_rid(), queued_instance["colID"]) #TODO random
 				queued_instance["state"] = BState.Unactive
 				queued_instance["props"] = bullet_props
 				if pattern.bullet in no_culling_for: queued_instance["no_culling"] = true
@@ -183,6 +204,7 @@ func spawn(target, id:String, shared_area="0"):
 				queued_instance["source_node"] = target
 				if bullet_props.has("groups"): queued_instance["groups"] = bullet_props.get("groups")
 				if pattern.follows_parent: queued_instance["follows_parent"] = true
+				bID = wake_from_pool(pattern.bullet, queued_instance)
 				
 				match pattern.resource_name:
 					"PatternCircle":
@@ -532,8 +554,9 @@ func delete_bullet(b:RID):
 	var B = poolBullets[b]
 	if B["props"].has("anim_delete_sfx"): $SFX.get_child(B["props"]["anim_delete_sfx"]).play()
 	B["shared_area"].set_meta("ShapeCount", B["shared_area"].get_meta("ShapeCount")-1)
-	poolBullets.erase(b)
-	Phys.free_rid(b)
+	back_to_grave(B["props"]["__ID__"],b)
+#	poolBullets.erase(b)
+#	Phys.free_rid(b)
 
 func get_bullets_in_radius(origin:Vector2, radius:float):
 	var res:Array
@@ -541,6 +564,9 @@ func get_bullets_in_radius(origin:Vector2, radius:float):
 		if poolBullets[b]["position"].distance_to(origin) < radius:
 			res.append(b)
 	return res
+
+func get_shared_area_rid(shared_area_name:String):
+	return $SharedAreas.get_node(shared_area_name).get_rid()
 
 func change_shared_area(b:Dictionary, rid:RID, idx:int, new_area:Area2D):
 	Phys.area_remove_shape(b["shared_area"].get_rid(),idx)
@@ -785,8 +811,9 @@ func bullet_movement(delta:float):
 	var shared_rid:RID
 	for area in $SharedAreas.get_children():
 		shared_rid = area.get_rid()
-		for b in area.get_meta("ShapeCount"):#Phys.area_get_shape_count(shared_rid):
-			B = poolBullets[get_RID_from_index(shared_rid,b)]
+		for b in area.get_meta("ShapeCount"):
+			if not poolBullets.has(get_RID_from_index(shared_rid,b)): continue
+			B = poolBullets[get_RID_from_index(shared_rid,b)] # TODO change that for optimisation
 			if B["state"] == BState.Unactive or check_move_culling(B): continue
 			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0),B["position"]).scaled(B.get("scale",Vector2(props["scale"],props["scale"]))))
 			

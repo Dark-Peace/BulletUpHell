@@ -72,7 +72,7 @@ func _ready():
 			if "anim_" in P and ";" in props.get(P):
 				props.set(P, Array(props.get(P).split(";",false)))
 			dict[P] = props.get(P)
+		dict["__ID__"] = id
 		Spawning.new_bullet(id, dict)
-		print(dict)
 		queue_free()
 	elif not props: props = BulletProps.new()
