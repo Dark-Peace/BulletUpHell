@@ -55,9 +55,6 @@ enum LIST_ENDS{Stop, Loop, Reverse}
 
 #var FONT = Label.new().get_font("")
 
-# DEFINE SPECIAL TARGETS HERE
-var ST_Player = null
-
 
 func _ready():
 	if Engine.is_editor_hint(): return
@@ -215,7 +212,6 @@ func spawn(target, id:String, shared_area="0"):
 				queued_instance["source_node"] = target
 				if bullet_props.has("groups"): queued_instance["groups"] = bullet_props.get("groups")
 				if pattern.follows_parent: queued_instance["follows_parent"] = true
-				bID = wake_from_pool(pattern.bullet, queued_instance, shared_area)
 				
 				match pattern.resource_name:
 					"PatternCircle":
@@ -235,6 +231,12 @@ func spawn(target, id:String, shared_area="0"):
 						queued_instance["spawn_pos"] = pattern.pos[randi()%pattern.pooling][i]
 						queued_instance["rotation"] = bullet_props.angle + ori_angle
 				set_angle(pattern, pos, queued_instance)
+				
+				if pattern.get("wait_tween_momentum") > 0:
+					var tw_endpos = queued_instance["spawn_pos"]+pos+Vector2(pattern["wait_tween_length"], 0).rotated(PI+queued_instance["rotation"])
+					queued_instance["momentum_data"] = [pattern["wait_tween_momentum"]-1 ,tw_endpos, pattern["wait_tween_time"]]
+					
+				bID = wake_from_pool(pattern.bullet, queued_instance, shared_area)
 				bullets.append(bID)
 				poolBullets[bID] = queued_instance
 			
@@ -394,12 +396,20 @@ func _spawn(bullets:Array):
 			target_from_options(B)
 		#print(B["position"])
 
+func use_momentum(pos:Vector2, B:Dictionary):
+	B["position"] = pos
+
 func _shoot(bullets:Array):
 	var B:Dictionary
 	for b in bullets:
 		if not poolBullets.has(b): continue
 		B = poolBullets[b]
 		if check_bullet_culling(B,b): continue
+		
+		if B.has("momentum_data"):
+			var tween = get_tree().create_tween()
+			tween.tween_method(use_momentum.bind(B), B["position"], B["momentum_data"][1], B["momentum_data"][2]).set_trans(B["momentum_data"][0])
+		
 		B["state"] = BState.Moving
 		
 #		if not B.get("follows_parent", false):
