@@ -85,12 +85,13 @@ func _process(delta: float) -> void:
 	if not cull_fixed_screen:
 		viewrect = Rect2(-get_canvas_transform().get_origin()/get_canvas_transform().get_scale(), \
 							get_viewport_rect().size/get_canvas_transform().get_scale())
-	queue_redraw()
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint(): return
 	
-	if not poolBullets.is_empty(): bullet_movement(delta)
+	if not poolBullets.is_empty():
+		bullet_movement(delta)
+		queue_redraw()
 	
 	time += delta
 	if time == loop_length: time = 0
@@ -197,13 +198,11 @@ func spawn(target, id:String, shared_area="0"):
 			
 			bullet_props = arrayProps[pattern.bullet]
 			if bullet_props.get("has_random",false): bullet_props = create_random_props(bullet_props)
-#			print(pattern.nbr)
 			shared_area_node.set_meta("ShapeCount", shared_area_node.get_meta("ShapeCount")+pattern.nbr) # Warning, bad sync possible ?
 			for i in pattern.nbr:
 				queued_instance = {}
 				queued_instance["shared_area"] = shared_area_node
 				queued_instance["colID"] = bullet_props.get("anim_spawn_collision", bullet_props["anim_idle_collision"])
-#				bID = create_shape(queued_instance["shared_area"].get_rid(), queued_instance["colID"]) #TODO random
 				queued_instance["state"] = BState.Unactive
 				queued_instance["props"] = bullet_props
 				if pattern.bullet in no_culling_for: queued_instance["no_culling"] = true
@@ -321,7 +320,7 @@ func create_shape(shared_rid:RID, ColID:String, init:bool=false) -> RID:
 		new_shape = Phys.line_shape_create()
 		Phys.shape_set_data(new_shape, [template_shape.d,template_shape.normal])
 	elif template_shape is SeparationRayShape2D:
-		new_shape = Phys.ray_shape_create()
+		new_shape = Phys.separation_ray_shape_create()
 		Phys.shape_set_data(new_shape, [template_shape.length,template_shape.slide_on_slope])
 	elif template_shape is RectangleShape2D:
 		new_shape = Phys.rectangle_shape_create()
@@ -496,8 +495,8 @@ func _draw():
 		else: texture = textures.get_frame_texture(b["texture"],0)
 		
 		draw_set_transform(b["position"], b["rotation"]+b.get("rot_index",0),b.get("scale",Vector2(b["props"]["scale"],b["props"]["scale"])))
-		if b["props"].has("beam_length_per_ray"):
-			draw_multiline(Phys.shape_get_data(B), Color.RED)#,b["props"]["beam_width"]) #Warning TODO Remove phys get
+		if b.has("Beam"):
+			draw_multiline(b["Beam"], Color.RED)
 		elif b["props"].has("spec_modulate"):
 			if b["props"].has("spec_modulate_loop"):
 				draw_texture(texture,-texture.get_size()/2,b["props"]["spec_modulate"].sample(b["modulate_index"]))
@@ -690,7 +689,7 @@ func ray_cast(B:RID):
 	$RayCast2D.enabled = true
 	$RayCast2D.global_position = b["position"]
 	$RayCast2D.rotation = b["rotation"]
-	$RayCast2D.cast_to = Vector2(b["props"]["beam_length_per_ray"],0)
+	$RayCast2D.target_position = Vector2(b["props"]["beam_length_per_ray"],0)
 	$RayCast2D.collision_mask = b["shared_area"].collision_layer
 	
 	var array = []; var max_while = 0
@@ -701,22 +700,22 @@ func ray_cast(B:RID):
 		var pos = $RayCast2D.get_collision_point()
 		var angle = $RayCast2D.get_collision_normal()
 		if $RayCast2D.global_position.distance_to(pos) < 10:
-			$RayCast2D.global_position += $RayCast2D.cast_to.rotated($RayCast2D.rotation)/10
+			$RayCast2D.global_position += $RayCast2D.target_position.rotated($RayCast2D.rotation)/10
 			continue
 		else:
 			$RayCast2D.rotation = angle.angle()
-			$RayCast2D.global_position = pos + $RayCast2D.cast_to.rotated($RayCast2D.rotation)/10
+			$RayCast2D.global_position = pos + $RayCast2D.target_position.rotated($RayCast2D.rotation)/10
 			array.append(pos-$RayCast2D.global_position)
 			$RayCast2D.force_raycast_update()
-	array.append($RayCast2D.cast_to.rotated($RayCast2D.rotation))
+	array.append($RayCast2D.target_position)#.rotated($RayCast2D.rotation))
 	
-	make_laser(array, B, b["props"]["beam_width"])
+	make_laser(array, B, b["props"]["beam_width"], b)
 	
 	$RayCast2D.collision_mask = 0
 	$RayCast2D.global_position = UNACTIVE_ZONE
 	$RayCast2D.enabled = false
 
-func make_laser(points:Array, B:RID, width:float):
+func make_laser(points:Array, B:RID, width:float, b:Dictionary):
 	var array = []; var array2 = []; var angle
 	for point in points.size():
 		if point == points.size()-1: angle = points[point-1].angle_to_point(points[point])+PI/2
@@ -726,7 +725,8 @@ func make_laser(points:Array, B:RID, width:float):
 		array2.append(points[point]-Vector2(width,0).rotated(angle))
 	array2.reverse()
 	array.append_array(array2)
-	Phys.shape_set_data(B, PackedVector2Array(array))
+	b["Beam"] = PackedVector2Array(array)
+#	Phys.shape_set_data(B, PackedVector2Array(array))
 
 func bullet_movement(delta:float):
 	var props
@@ -900,6 +900,7 @@ func bullet_collide_area(area_rid:RID,area:Area2D,area_shape_index:int,local_sha
 	
 func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape_index:int,shared_area:Area2D) -> void:
 	var rid = get_RID_from_index(shared_area.get_rid(), local_shape_index)
+	if not poolBullets.has(rid): return
 	var B = poolBullets[rid]
 	if B.get("bounces",0) > 0:
 		bounce(B, shared_area)
@@ -913,11 +914,11 @@ func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape
 #		var rest_info:Dictionary = state.get_rest_info(param)
 #		print(rest_info)
 #
-#	if body.is_in_group("Player"):
-#		delete_bullet(rid)
+	if body.is_in_group("Player"):
+		delete_bullet(rid)
 ##		$CollisionShape2D.set_deferred("disabled", true)
 ##		$AnimationPlayer.play("Delete")
-#	elif B["props"]["death_from_collision"]: delete_bullet(rid)
+	elif B["props"]["death_from_collision"]: delete_bullet(rid)
 
 func bounce(B:Dictionary, shared_area:Area2D):
 	$Bouncy/CollisionShape2D.shape = arrayShapes[B["colID"]][0]
