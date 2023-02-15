@@ -7,7 +7,7 @@ enum ANGLE_TYPE{FromTangeant,FromCenter,Custom}
 var shape:Curve2D
 var calculate_angles:int = ANGLE_TYPE.FromTangeant
 var angles:Array = []
-var points:Array = []
+var pos:Array = []
 var center_pos:Vector2
 var reversed_angle:bool=false
 enum SYMTYPE{ClosedShape,Line}
