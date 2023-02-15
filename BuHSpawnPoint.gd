@@ -35,32 +35,32 @@ func _ready():
 	if not Engine.is_editor_hint():
 		if trigger_container:
 			trig_container = get_node(trigger_container)
-			set_process(false)
+			set_physics_process(false)
 		
 		if auto_start_on_cam:
 			assert(auto_pattern_id != "")
 			var instance = VisibleOnScreenNotifier2D.new()
 			instance.connect("screen_entered",Callable(self,"on_screen").bind(true))
 			instance.connect("screen_exited",Callable(self,"on_screen").bind(false))
-		elif auto_distance_from != NodePath(): set_process(true)
+		elif auto_distance_from != NodePath(): set_physics_process(true)
 		elif auto_pattern_id:
 			if auto_start_after_time > float(0.0):
 				await get_tree().create_timer(auto_start_after_time).timeout
 			auto_call = true
-			set_process(active)
+			set_physics_process(active)
 	
 	if active and auto_pattern_id:
 		if auto_start_after_time > float(0.0):
 			await get_tree().create_timer(auto_start_after_time).timeout
 		auto_call = true
-		set_process(active)
+		set_physics_process(active)
 		
-	if rotating_speed > 0: set_process(active)
+	if rotating_speed > 0: set_physics_process(active)
 	
 	if active and pool_amount > 0:
 		Spawning.create_pool(Spawning.pattern(auto_pattern_id)["bullet"], shared_area_name, pool_amount)
 
-func _process(delta):
+func _physics_process(delta):
 	if Engine.is_editor_hint(): return
 	if auto_distance_from != NodePath() and global_position.distance_to(get_node(auto_distance_from).global_position) <= auto_start_at_distance:
 		active = true
@@ -69,7 +69,7 @@ func _process(delta):
 	if can_respawn and auto_call and active and auto_pattern_id:
 		Spawning.spawn(self, auto_pattern_id, shared_area_name)
 		can_respawn = false
-		if not rotating_speed > 0: set_process(false)
+		if not rotating_speed > 0: set_physics_process(false)
 	
 	rotate(rotating_speed)
 
@@ -78,7 +78,7 @@ func on_screen(is_on):
 	if is_on and auto_start_after_time > float(0.0):
 		await get_tree().create_timer(auto_start_after_time).timeout
 	active = is_on
-	set_process(active)
+	set_physics_process(active)
 
 func triggerSignal(sig):
 	trig_signal = sig
@@ -98,6 +98,10 @@ func _get_property_list() -> Array:
 			type = TYPE_BOOL,
 			usage = PROPERTY_USAGE_DEFAULT 
 		},{
+			name = "auto_pattern_id",
+			type = TYPE_STRING,
+			usage = PROPERTY_USAGE_DEFAULT 
+		},{
 			name = "shared_area_name",
 			type = TYPE_STRING,
 			usage = PROPERTY_USAGE_DEFAULT 
@@ -114,10 +118,6 @@ func _get_property_list() -> Array:
 			type = TYPE_NIL,
 			hint_string = "auto_",
 			usage = PROPERTY_USAGE_GROUP
-		},{
-			name = "auto_pattern_id",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT 
 		},{
 			name = "auto_start_on_cam",
 			type = TYPE_BOOL,

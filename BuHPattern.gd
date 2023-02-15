@@ -43,7 +43,7 @@ func _ready():
 					else: angle = curve.get_point_position(point+1).angle_to_point(curve.get_point_position(point-1))+PI/2
 				elif pattern.calculate_angles == pattern.ANGLE_TYPE.FromCenter:
 					angle = pattern.center_pos.angle_to_point(pos)+PI
-				pattern.points.append(pos)
+				pattern.pos.append(pos-pattern.center_pos)
 				if pattern.calculate_angles != pattern.ANGLE_TYPE.Custom: pattern.angles.append(angle+(PI*int(pattern.reversed_angle)))
 		
 		elif pattern.resource_name == "PatternCustomArea":

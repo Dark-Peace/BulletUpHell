@@ -224,7 +224,7 @@ func spawn(target, id:String, shared_area="0"):
 						queued_instance["spawn_pos"] = Vector2()
 						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + ori_angle
 					"PatternCustomShape","PatternCustomPoints":
-						queued_instance["spawn_pos"] = pattern.points[i]
+						queued_instance["spawn_pos"] = pattern.pos[i]
 						queued_instance["rotation"] = bullet_props.angle + pattern.angles[i] + pattern.layer_angle_offset*l + ori_angle
 					"PatternCustomArea":
 						queued_instance["spawn_pos"] = pattern.pos[randi()%pattern.pooling][i]
@@ -555,7 +555,7 @@ func check_culling(B:Dictionary,type:int):
 		CULLTYPE.Bullet: can_cull = cull_bullets
 		CULLTYPE.Move: can_cull = cull_partial_move
 		CULLTYPE.Trigger: can_cull = cull_trigger
-	return can_cull and not viewrect.grow(cull_minimum_speed_required/B["speed"]).has_point(B["position"]) \
+	return can_cull and not viewrect.grow(cull_minimum_speed_required/B["speed"]).abs().has_point(B["position"]) \
 			and !B.get("no_culling",false)
 
 func clear_all_bullets():
@@ -743,7 +743,7 @@ func bullet_movement(delta:float):
 				delete_bullet(b)
 				continue
 		if props.has("beam_length_per_ray"): ray_cast(b)
-		if B.has("rot_index"): B["rot_index"] += props["spec_rotation_speed"]
+		if B.has("rot_index"): B["rot_index"] += props["spec_rotating_speed"]
 			
 		#scale curve
 		if B.get("scale_multi_iter",0) != 0:
