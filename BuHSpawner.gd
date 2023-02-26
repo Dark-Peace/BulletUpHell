@@ -172,7 +172,7 @@ func spawn(target, id:String, shared_area="0"):
 						queued_instance["spawn_pos"] = Vector2(cos(angle)*pattern.radius,sin(angle)*pattern.radius).rotated(pattern.pattern_angle)
 						queued_instance["rotation"] = angle + bullet_props.angle + pattern.layer_angle_offset*l
 					"PatternLine":
-						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center_pos-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
+						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
 						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + pattern.pattern_angle
 					"PatternOne":
 						queued_instance["spawn_pos"] = Vector2()
