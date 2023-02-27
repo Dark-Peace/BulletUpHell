@@ -835,11 +835,11 @@ func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape
 #		var rest_info:Dictionary = state.get_rest_info(param)
 #		print(rest_info)
 #
-#	if body.is_in_group("Player"):
-#		delete_bullet(rid)
+	if body.is_in_group("Player"):
+		delete_bullet(rid)
 ##		$CollisionShape2D.set_deferred("disabled", true)
 ##		$AnimationPlayer.play("Delete")
-#	elif B["props"]["death_from_collision"]: delete_bullet(rid)
+	elif B["props"]["death_from_collision"]: delete_bullet(rid)
 
 func bounce(B:Dictionary, shared_area:Area2D):
 	$Bouncy/CollisionShape2D.shape = arrayShapes[B["colID"]][0]
