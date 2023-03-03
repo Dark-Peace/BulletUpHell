@@ -1,16 +1,16 @@
-[gd_scene load_steps=26 format=3 uid="uid://cs7sucgg0ln55"]
+[gd_scene load_steps=26 format=3 uid="uid://cvx1mnumf2p38"]
 
-[ext_resource type="Script" path="res://Examples/ExampleScene.gd" id="1_0f3ke"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/BuHPattern.gd" id="2_anth0"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/BuHBulletProperties.gd" id="3_3yh4n"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternOne.gd" id="3_x5djd"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/BulletProps.gd" id="4_egh5w"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCircle.gd" id="4_jrqvo"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/BuHSpawnPoint.gd" id="5_hheak"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternLine.gd" id="5_jb0od"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCustomPoints.gd" id="6_58ntm"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCustomShape.gd" id="7_kgcuu"]
-[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCustomArea.gd" id="8_jymmq"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/ExampleScenes/ExampleScene.gd" id="1_3jldb"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/BuHPattern.gd" id="2_ah2t8"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternOne.gd" id="3_d681h"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCircle.gd" id="4_3qlmj"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternLine.gd" id="5_vvcng"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCustomPoints.gd" id="6_gcika"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCustomShape.gd" id="7_aiav0"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternCustomArea.gd" id="8_ky438"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/BuHBulletProperties.gd" id="9_x0nxu"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/BulletProps.gd" id="10_tkfof"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/BuHSpawnPoint.gd" id="11_iv1jv"]
 
 [sub_resource type="Curve2D" id="Curve2D_u3j77"]
 _data = {
@@ -20,7 +20,7 @@ point_count = 10
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_kt31x"]
 resource_name = "PatternOne"
-script = ExtResource("3_x5djd")
+script = ExtResource("3_d681h")
 bullet = "1"
 iterations = -1
 follows_parent = false
@@ -67,7 +67,7 @@ r_cooldown_n_shoot_variation = Vector3(0, 0, 0)
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_iro43"]
 resource_name = "PatternCircle"
-script = ExtResource("4_jrqvo")
+script = ExtResource("4_3qlmj")
 bullet = "1"
 nbr = 5
 radius = 0
@@ -128,7 +128,7 @@ r_cooldown_n_shoot_variation = Vector3(0, 0, 0)
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_txvqr"]
 resource_name = "PatternLine"
-script = ExtResource("5_jb0od")
+script = ExtResource("5_vvcng")
 offset = Vector2(0, 15)
 center = 1
 symmetrical = null
@@ -185,7 +185,7 @@ r_cooldown_n_shoot_variation = Vector3(0, 0, 0)
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_8sitp"]
 resource_name = "PatternCustomPoints"
-script = ExtResource("6_58ntm")
+script = ExtResource("6_gcika")
 bullet = "1"
 center_pos = Vector2(760, 60)
 angles = []
@@ -249,7 +249,7 @@ point_count = 11
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_pxg84"]
 resource_name = "PatternCustomShape"
-script = ExtResource("7_kgcuu")
+script = ExtResource("7_aiav0")
 bullet = "1"
 nbr = 5
 closed_shape = true
@@ -309,7 +309,7 @@ point_count = 10
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_ctjs0"]
 resource_name = "PatternCustomArea"
-script = ExtResource("8_jymmq")
+script = ExtResource("8_ky438")
 bullet = "1"
 nbr = 5
 pattern_angle = 0.0
@@ -370,7 +370,7 @@ r_cooldown_n_shoot_variation = Vector3(0, 0, 0)
 [sub_resource type="Curve" id="Curve_2xsyn"]
 
 [sub_resource type="PackedDataContainer" id="PackedDataContainer_yktta"]
-script = ExtResource("4_egh5w")
+script = ExtResource("10_tkfof")
 speed = 100.0
 scale = 1
 angle = 0
@@ -462,43 +462,44 @@ r_scale_multi_scale_variation = Vector3(0, 0, 0)
 size = Vector2(64, 624)
 
 [node name="Node2D" type="Node2D"]
-script = ExtResource("1_0f3ke")
+rotation = 6.28319
+script = ExtResource("1_3jldb")
 
 [node name="Patterns" type="Node2D" parent="."]
 
 [node name="SpawnPattern" type="Path2D" parent="Patterns"]
 curve = SubResource("Curve2D_u3j77")
-script = ExtResource("2_anth0")
+script = ExtResource("2_ah2t8")
 id = "one"
 pattern = SubResource("NavigationPolygon_kt31x")
 
 [node name="SpawnPattern2" type="Path2D" parent="Patterns"]
 curve = SubResource("Curve2D_u3j77")
-script = ExtResource("2_anth0")
+script = ExtResource("2_ah2t8")
 id = "circle"
 pattern = SubResource("NavigationPolygon_iro43")
 
 [node name="SpawnPattern3" type="Path2D" parent="Patterns"]
 curve = SubResource("Curve2D_u3j77")
-script = ExtResource("2_anth0")
+script = ExtResource("2_ah2t8")
 id = "line"
 pattern = SubResource("NavigationPolygon_txvqr")
 
 [node name="SpawnPattern4" type="Path2D" parent="Patterns"]
 curve = SubResource("Curve2D_u3j77")
-script = ExtResource("2_anth0")
+script = ExtResource("2_ah2t8")
 id = "points"
 pattern = SubResource("NavigationPolygon_8sitp")
 
 [node name="SpawnPattern5" type="Path2D" parent="Patterns"]
 curve = SubResource("Curve2D_jpnr8")
-script = ExtResource("2_anth0")
+script = ExtResource("2_ah2t8")
 id = "shape"
 pattern = SubResource("NavigationPolygon_pxg84")
 
 [node name="SpawnPattern6" type="Path2D" parent="Patterns"]
 curve = SubResource("Curve2D_qvlio")
-script = ExtResource("2_anth0")
+script = ExtResource("2_ah2t8")
 id = "area"
 pattern = SubResource("NavigationPolygon_ctjs0")
 
@@ -506,7 +507,7 @@ pattern = SubResource("NavigationPolygon_ctjs0")
 
 [node name="BulletPattern" type="Path2D" parent="BulletProps"]
 curve = SubResource("Curve2D_kjhx3")
-script = ExtResource("3_3yh4n")
+script = ExtResource("9_x0nxu")
 id = "1"
 props = SubResource("PackedDataContainer_yktta")
 
@@ -514,11 +515,11 @@ props = SubResource("PackedDataContainer_yktta")
 
 [node name="SpawnPoint" type="Node2D" parent="SpawnPoints"]
 position = Vector2(86, 58)
-script = ExtResource("5_hheak")
+script = ExtResource("11_iv1jv")
 active = true
 auto_pattern_id = "one"
 shared_area_name = "0"
-rotating_speed = 0.0
+rotating_speed = 1.0
 pool_amount = 50
 auto_start_on_cam = true
 auto_start_after_time = 0.0
@@ -535,7 +536,7 @@ r_start_time_variation = Vector3(0, 0, 0)
 
 [node name="SpawnPoint2" type="Node2D" parent="SpawnPoints"]
 position = Vector2(86, 307)
-script = ExtResource("5_hheak")
+script = ExtResource("11_iv1jv")
 active = true
 auto_pattern_id = "circle"
 shared_area_name = "0"
@@ -556,7 +557,7 @@ r_start_time_variation = Vector3(0, 0, 0)
 
 [node name="SpawnPoint3" type="Node2D" parent="SpawnPoints"]
 position = Vector2(83, 510)
-script = ExtResource("5_hheak")
+script = ExtResource("11_iv1jv")
 active = true
 auto_pattern_id = "line"
 shared_area_name = "0"
@@ -577,7 +578,7 @@ r_start_time_variation = Vector3(0, 0, 0)
 
 [node name="SpawnPoint4" type="Node2D" parent="SpawnPoints"]
 position = Vector2(746, 119)
-script = ExtResource("5_hheak")
+script = ExtResource("11_iv1jv")
 active = true
 auto_pattern_id = "points"
 shared_area_name = "0"
@@ -598,7 +599,7 @@ r_start_time_variation = Vector3(0, 0, 0)
 
 [node name="SpawnPoint5" type="Node2D" parent="SpawnPoints"]
 position = Vector2(748, 271)
-script = ExtResource("5_hheak")
+script = ExtResource("11_iv1jv")
 active = true
 auto_pattern_id = "shape"
 shared_area_name = "0"
@@ -619,7 +620,7 @@ r_start_time_variation = Vector3(0, 0, 0)
 
 [node name="SpawnPoint6" type="Node2D" parent="SpawnPoints"]
 position = Vector2(746, 465)
-script = ExtResource("5_hheak")
+script = ExtResource("11_iv1jv")
 active = true
 auto_pattern_id = "area"
 shared_area_name = "0"

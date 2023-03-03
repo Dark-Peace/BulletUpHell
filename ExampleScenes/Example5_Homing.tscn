@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/BulletUpHell/ExampleScenes/ExampleScene.gd" id="1_bkhcb"]
+
+[sub_resource type="RectangleShape2D" id="21"]
+size = Vector2(64, 624)
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_bkhcb")
+
+[node name="Patterns" type="Node2D" parent="."]
+
+[node name="BulletProps" type="Node2D" parent="."]
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls"]
+polygon = PackedVector2Array(1024, -8, 1024, 600, 0, 600, 0, 0, -56, 0, -48, 656, 1072, 640, 1056, -64, 0, -64, 8, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls"]
+position = Vector2(504, 288)
+shape = SubResource("21")
+
+[node name="Polygon2D" type="Polygon2D" parent="Walls/CollisionShape2D"]
+position = Vector2(-504, -288)
+scale = Vector2(1, 1.0274)
+polygon = PackedVector2Array(472, 0, 472, 584, 536, 584, 536, 0)
+
+[node name="FPS" type="Label" parent="."]
+visible = false
+offset_right = 40.0
+offset_bottom = 14.0
+
+[node name="Tuto" type="Label" parent="."]
+offset_left = 22.0
+offset_top = -322.0
+offset_right = 863.0
+offset_bottom = -114.0
+text = "Patterns have several cooldown options, which you can use together.
+Cooldown_shoot is the cooldown before shooting once all the bullets are spawned.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cooldown_next_shoot is the time between 2 shots. 0 by default for all the bullets being shot at the same time"
+
+[node name="Tuto2" type="Label" parent="."]
+offset_left = 8.0
+offset_top = -468.0
+offset_right = 1169.0
+offset_bottom = -130.0
+text = "Cooldown_next_spawn is the time between 2 bullets (from the same pattern) spawning. 0 by default for all the bullets being spanwed at the same time
+
+
+
+
+
+
+
+
+
+
+
+Cooldown_spawn is the cooldown between 2 iterations of the pattern"

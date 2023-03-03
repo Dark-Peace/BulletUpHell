@@ -1,6 +1,6 @@
-[gd_scene load_steps=32 format=3 uid="uid://5wetl6pka0cs"]
+[gd_scene load_steps=32 format=3]
 
-[ext_resource type="Script" path="res://Examples/ExampleScene.gd" id="1_f4dyt"]
+[ext_resource type="Script" path="res://addons/BulletUpHell/ExampleScenes/ExampleScene.gd" id="1_f4dyt"]
 [ext_resource type="Script" path="res://addons/BulletUpHell/BuHPattern.gd" id="2_w35i7"]
 [ext_resource type="Script" path="res://addons/BulletUpHell/SpawnPatterns/PatternOne.gd" id="3_ra0lu"]
 [ext_resource type="Script" path="res://addons/BulletUpHell/BuHBulletProperties.gd" id="9_uqn31"]
