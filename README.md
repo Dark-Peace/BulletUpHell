@@ -8,8 +8,8 @@
 
 BulletUpHell is a BulletHell Godot plugin available for
  - Godot 3.4
- - Godot 35
- - Godot 4 (coming soon!)
+ - Godot 3.5
+ - Godot 4 (recommended version)
 
 The goal is to provide you with all the tools you need to make a BulletHell game. The plugin takes care of everything related to bullet spawning : patterns, bullet properties, event triggering,... Features include complex bullet movement (from math equations to custom drawn paths), advanced homing features, built-in animation and sound manager, ability to randomise everything, and much more !
 
@@ -30,16 +30,13 @@ For any question or request, join my Discord : https://discord.com/invite/aWWQbg
 ## Q&A
 
 Q: Will there be new features in the future ?
-A: Yes, you can read a barely readable checklist in the documentation. New feautres will be added in V4 for Godot 4. They'll most likely won't be backported to Godot 3.
+A: Yes, you can read a barely readable checklist in the documentation. New features will be added in V4 for Godot 4. They'll most likely won't be backported to Godot 3.
 
-Q: Will it be available for Godot 4 ?
-A: Yes, first I'll port the V3 to Godot 4 as it is right now then I'll update it with new features.
-
-Q: I downloaded the alpha version, should I change to V3.4 ? Are they compatible ?
+Q: I downloaded the alpha version, should I change to V3.4 or V4.0 ? Are they compatible ?
 A: If you're satisfied with the features and the performances of V0.1, there is no reason to update, as they're will probably be compatibility issues since I rewrote all the back-end of the plugin.
 
-Q: Will V3.4 and V4 (for Godot 4) be compatible (aka : can I use V34 and update it later to V4 ?) ?
-A: No major changes should occur in the way the plugin works. But using custom resources in Godot sometimes lead to issues when those resources update (Furthermore, Godot 4 isn't out yet, so there's no way to know for sure what would work). The safest way is always to make a back-up before updating.
+Q: Will V3.4 and V4 be compatible (aka : can I use V34 and update it later to V4 ?) ?
+A: No major changes should occur in the way the plugin works. But using custom resources in Godot sometimes lead to issues when those resources update. The safest way is always to make a back-up before updating.
 
 Q: Will the alpha version, with its unoptimised code, be updated Godot 4 ?
 A: No. But someone contacted me to ask if they could, I said yes.
@@ -47,5 +44,5 @@ A: No. But someone contacted me to ask if they could, I said yes.
 Q: Can I make updates to the plugin ?
 A: Sure, but please tell me about it. Also any feature idea is welcomed.
 
-Q: The alpha version used nodes as bullets, but not the V3.4 and I don't like it.
+Q: The alpha version used nodes as bullets, but not the V3.4/V4 and I don't like it.
 A: It was for optimisation's sake. All of the basic features of a node are reproductible with the current system but I'll add node-compatibility in the V4 for Godot 4.
