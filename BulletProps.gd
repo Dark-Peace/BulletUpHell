@@ -60,7 +60,7 @@ var trigger_wait_for_shot = true
 ## homing
 enum GROUP_SELECT{Nearest_on_homing,Nearest_on_spawn,Nearest_on_shoot,Nearest_anywhen,Random}
 enum LIST_BEHAVIOUR{Stop, Loop, Reverse}
-enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, List}
+enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, ListPositions, ListNodes}
 var homing_type:int = TARGET_TYPE.Nodepath : set = set_homing_type
 var homing_target:NodePath = NodePath()
 var homing_special_target:String
@@ -68,6 +68,8 @@ var homing_group:String
 var homing_select_in_group:int = GROUP_SELECT.Nearest_on_homing
 var homing_surface:Array
 var homing_list:Array
+var homing_list_pos:Array[Vector2]
+var homing_list_nodes:Array[NodePath]
 var homing_list_ordered:bool = true
 var homing_when_list_ends:int = LIST_BEHAVIOUR.Stop
 var homing_position:Vector2
@@ -351,8 +353,16 @@ func _get_property_list() -> Array:
 			type = TYPE_ARRAY,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
-			name = "homing_list",
+			name = "homing_list_pos",
 			type = TYPE_ARRAY,
+			hint = PROPERTY_HINT_ARRAY_TYPE,
+			hint_string = "Vector2",
+			usage = PROPERTY_USAGE_DEFAULT
+		},{
+			name = "homing_list_nodes",
+			type = TYPE_ARRAY,
+			hint = PROPERTY_HINT_ARRAY_TYPE,
+			hint_string = "NodePath",
 			usage = PROPERTY_USAGE_DEFAULT
 		}]
 	var PL_homing_group = [{
@@ -373,11 +383,11 @@ func _get_property_list() -> Array:
 			hint_string = LIST_BEHAVIOUR,
 			usage = PROPERTY_USAGE_DEFAULT
 		}]
-	
+
 	PL_homing = [PL_homing[homing_type]]
 	if homing_type in [TARGET_TYPE.Group, TARGET_TYPE.Surface]: PL_homing += PL_homing_group
-	elif homing_type == TARGET_TYPE.List: PL_homing += PL_homing_list
-	
+	elif homing_type in [TARGET_TYPE.ListNodes,TARGET_TYPE.ListPositions]: PL_homing += PL_homing_list
+
 	var PL2 = [{
 			name = "homing_steer",
 			type = TYPE_FLOAT,
