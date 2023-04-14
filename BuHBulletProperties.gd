@@ -74,7 +74,7 @@ func _ready():
 					has_random = true
 					dict["has_random"] = true
 
-			if "anim_" in P and ";" in props.get(P):
+			if ("anim_" in P and not "_sfx" in P) and ";" in props.get(P):
 				props.set(P, Array(props.get(P).split(";",false)))
 			dict[P] = props.get(P)
 		dict["__ID__"] = id

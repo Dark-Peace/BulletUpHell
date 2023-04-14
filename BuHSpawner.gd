@@ -479,18 +479,20 @@ func _draw():
 			(b["props"].has("spec_modulate") and b["props"].has("spec_modulate_loop") and \
 			b["props"]["spec_modulate"].get_color(0).a == 0): continue
 		if b.has("anim_frame"):
-			b["anim_counter"] += 1
-#			if b["anim_counter"] >= (1/_delta)/b["anim_speed"]:
-			if _delta != 0 and b["anim_counter"] >= (1/_delta)/b["anim_speed"]:
+			b["anim_counter"] += _delta
+			if b["anim_counter"] >= 1/b["anim_speed"]:
+				b["anim_counter"] = 0
 				b["anim_frame"] += 1
 				if b["anim_frame"] >= b["anim_length"]:
-					if b["anim_loop"]: b["anim_frame"] = 0
+					if b["anim_loop"]:
+						b["anim_frame"] = 0
 					elif b["state"] == BState.Shooting:
 						b["state"] = BState.Moving
 						change_animation(b, "moving",B)
 					elif b["state"] == BState.Spawning:
 						b["state"] = BState.Spawned
 						change_animation(b, "waiting",B)
+				else: print(b["anim_frame"])
 			texture = textures.get_frame_texture(b["texture"],b["anim_frame"])
 		else: texture = textures.get_frame_texture(b["texture"],0)
 
