@@ -481,7 +481,7 @@ func _draw():
 			b["props"]["spec_modulate"].get_color(0).a == 0): continue
 		if b.has("anim_frame"):
 			b["anim_counter"] += 1
-			if b["anim_counter"] >= (1/_delta)/b["anim_speed"]:
+			if _delta != 0 and b["anim_counter"] >= (1/_delta)/b["anim_speed"]:
 				b["anim_frame"] += 1
 				if b["anim_frame"] >= b["anim_length"]:
 					if b["anim_loop"]: b["anim_frame"] = 0
