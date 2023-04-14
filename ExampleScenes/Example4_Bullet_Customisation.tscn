@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene load_steps=32 format=3 uid="uid://cy823nswtu3v3"]
 
 [ext_resource type="Script" path="res://addons/BulletUpHell/ExampleScenes/ExampleScene.gd" id="1_f4dyt"]
 [ext_resource type="Script" path="res://addons/BulletUpHell/BuHPattern.gd" id="2_w35i7"]
@@ -1041,47 +1041,9 @@ offset_right = 40.0
 offset_bottom = 14.0
 
 [node name="Tuto" type="Label" parent="."]
-offset_left = 22.0
-offset_top = -322.0
-offset_right = 863.0
-offset_bottom = -114.0
-text = "Patterns have several cooldown options, which you can use together.
-Cooldown_shoot is the cooldown before shooting once all the bullets are spawned.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Cooldown_next_shoot is the time between 2 shots. 0 by default for all the bullets being shot at the same time"
-
-[node name="Tuto2" type="Label" parent="."]
-offset_left = 63.0
-offset_top = -459.0
-offset_right = 1224.0
-offset_bottom = -121.0
-text = "Cooldown_next_spawn is the time between 2 bullets (from the same pattern) spawning. 0 by default for all the bullets being spanwed at the same time
-
-
-
-
-
-
-
-
-
-
-
-Cooldown_spawn is the cooldown between 2 iterations of the pattern"
+offset_left = 64.0
+offset_top = -192.0
+offset_right = 905.0
+offset_bottom = 16.0
+text = "Bullet properties determine how the bullet will act  and look once it spawned.
+There's a lot of different combinations possible."
