@@ -366,14 +366,11 @@ func unactive_spawn(bullets:Array):
 	for b in bullets:
 		assert(poolBullets.has(b))
 		B = poolBullets[b]
-		#print("spawn ",b.get_id())
 		if B["state"] >= BState.Moving: continue
 		if B["source_node"] is RID: B["position"] = B["spawn_pos"] + poolBullets[B["source_node"]]["position"]
 		else: B["position"] = B["spawn_pos"] + B["source_node"].global_position
 
 func _spawn(bullets:Array):
-#	for b in bullets:
-#		print("to spawn ",b.get_id())
 	var B:Dictionary
 	for b in bullets:
 		if not poolBullets.has(b):
@@ -393,7 +390,6 @@ func _spawn(bullets:Array):
 		init_special_variables(B,b)
 		if B["props"].get("homing_select_in_group",-1) == GROUP_SELECT.Nearest_on_spawn:
 			target_from_options(B)
-		#print(B["position"])
 
 func use_momentum(pos:Vector2, B:Dictionary):
 	B["position"] = pos
@@ -492,7 +488,6 @@ func _draw():
 					elif b["state"] == BState.Spawning:
 						b["state"] = BState.Spawned
 						change_animation(b, "waiting",B)
-				else: print(b["anim_frame"])
 			texture = textures.get_frame_texture(b["texture"],b["anim_frame"])
 		else: texture = textures.get_frame_texture(b["texture"],0)
 
@@ -807,7 +802,6 @@ func bullet_movement(delta:float):
 				B["vel"] += ((target_pos-B["position"]).normalized()*B["speed"]-B["vel"]).normalized()*props["homing_steer"]*delta
 #				B["vel"] = B["vel"].clamp(Vector2(0,0), Vector2(B["speed"],B["speed"]))
 				B["rotation"] = B["vel"].angle()
-				print(B["vel"])
 
 			# follow path2D
 			if props.get("curve"):
