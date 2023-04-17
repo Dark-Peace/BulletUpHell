@@ -48,14 +48,9 @@ points = PackedVector2Array(0, 0)
 [node name="BulletHellManager" type="Node2D"]
 z_index = 999
 script = ExtResource("1")
-sfx_list = Array[AudioStream]([])
 rand_variation_list = Array[Curve]([SubResource("4")])
-cull_bullets = true
-cull_except_for = ""
-cull_margin = 50
 cull_trigger = false
 cull_partial_move = false
-cull_minimum_speed_required = 200
 cull_fixed_screen = null
 
 [node name="SharedAreas" type="Node2D" parent="."]
@@ -63,6 +58,7 @@ cull_fixed_screen = null
 [node name="0" type="Area2D" parent="SharedAreas"]
 
 [node name="ShapeManager" type="AnimatedSprite2D" parent="."]
+visible = false
 sprite_frames = SubResource("1")
 animation = &"Example"
 frame_progress = 0.608517

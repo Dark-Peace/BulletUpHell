@@ -1,25 +1,20 @@
 @tool
-@icon("res://addons/BulletUpHell/Sprites/NodeIcons15.png")
+@icon("res://addons/BulletUpHell/Sprites/NodeIcons21.png")
 extends PackedDataContainer
-class_name BulletProps
+class_name BulletNodeProps
+
+@export var instance_id:String
 
 var speed:float = 100
 var scale = 1
 var angle = 0
 var groups = []
+var overwrite_groups:bool = false
 var death_after_time:float = 30
 var death_outside_box:Rect2 = Rect2()
 var death_from_collision:bool = true
 
 ## animations
-var anim_idle_texture:String = "0"
-var anim_spawn_texture:String
-var anim_waiting_texture:String
-var anim_delete_texture:String
-var anim_idle_collision:String = "0"
-var anim_spawn_collision:String
-var anim_waiting_collision:String
-var anim_delete_collision:String
 var anim_idle_sfx:int = -1 #TODO change to string
 var anim_spawn_sfx:int = -1
 var anim_waiting_sfx:int = -1
@@ -40,7 +35,6 @@ var spec_bounces = 0
 var spec_no_collision = false
 var spec_modulate:Gradient
 var spec_modulate_loop:float = 0.0
-var spec_skew:float = 0.0
 var spec_rotating_speed = 0.0
 var spec_trail_length:float = 0.0
 var spec_trail_width:float = 0.0
@@ -69,11 +63,6 @@ var homing_position:Vector2
 var homing_steer = 0
 var homing_time_start = 0
 var homing_duration = 999
-
-## laser beams
-#var beam_length_per_ray:float = 0
-#var beam_width:float = 0
-#var beam_bounce_amount:int = 0
 
 ## advanced scale
 var scale_multi_iterations = 0
@@ -122,10 +111,6 @@ var r_wait_for_shot_chances:float
 # draw
 # animations directly in
 #todo
-var r_beam_length_choice:String
-var r_beam_length_variation:Vector3
-var r_beam_bounce_choice:String
-var r_beam_width_variation:Vector3
 var r_no_coll_chances:float
 var r_modulate_variation:Vector3
 
@@ -159,42 +144,14 @@ func _get_property_list() -> Array:
 			type = TYPE_PACKED_STRING_ARRAY,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
-			name = "Animations",
+			name = "overwrite_groups",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT
+		},{
+			name = "SFX",
 			type = TYPE_NIL,
 			hint_string = "anim_",
 			usage = PROPERTY_USAGE_GROUP
-		},{
-			name = "anim_idle_texture",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_spawn_texture",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_waiting_texture",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_delete_texture",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_idle_collision",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_spawn_collision",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_waiting_collision",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "anim_delete_collision",
-			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "anim_idle_sfx",
 			type = TYPE_INT,
@@ -233,12 +190,6 @@ func _get_property_list() -> Array:
 		},{
 			name = "spec_modulate_loop",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "spec_skew",
-			type = TYPE_FLOAT,
-			hint = PROPERTY_HINT_RANGE,
-			hint_string = "-89,9, 89.9",
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "spec_trail_length",
@@ -397,26 +348,7 @@ func _get_property_list() -> Array:
 			name = "homing_duration",
 			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
-		},
-#		{
-#			name = "Laser Beam",
-#			type = TYPE_NIL,
-#			hint_string = "beam_",
-#			usage = PROPERTY_USAGE_GROUP
-#		},{
-#			name = "beam_length_per_ray",
-#			type = TYPE_FLOAT,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},{
-#			name = "beam_width",
-#			type = TYPE_FLOAT,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},{
-#			name = "beam_bounce_amount",
-#			type = TYPE_INT,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},
-		{
+		},{
 			name = "Advanced Scale",
 			type = TYPE_NIL,
 			hint_string = "scale_",
@@ -482,10 +414,6 @@ func _get_property_list() -> Array:
 		{ name = "r_homing_delay_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_homing_dur_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_homing_dur_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_beam_length_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_beam_length_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_beam_bounce_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_beam_width_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_scale_multi_curve_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_scale_multi_iter_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
 		{ name = "r_scale_multi_scale_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT }

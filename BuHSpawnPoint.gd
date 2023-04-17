@@ -32,23 +32,24 @@ var auto_call = false
 var can_respawn = true
 
 func _ready():
-	if not Engine.is_editor_hint():
-		if trigger_container:
-			trig_container = get_node(trigger_container)
-			set_physics_process(false)
-		
-		if auto_start_on_cam:
-			assert(auto_pattern_id != "")
-			var instance = VisibleOnScreenNotifier2D.new()
-			instance.connect("screen_entered",Callable(self,"on_screen").bind(true))
-			instance.connect("screen_exited",Callable(self,"on_screen").bind(false))
-		elif auto_distance_from != NodePath(): set_physics_process(true)
-		elif auto_pattern_id:
-			if auto_start_after_time > float(0.0):
-				await get_tree().create_timer(auto_start_after_time).timeout
-			auto_call = true
-			set_physics_process(active)
+	if Engine.is_editor_hint(): return
 	
+	if trigger_container:
+		trig_container = get_node(trigger_container)
+		set_physics_process(false)
+
+	if auto_start_on_cam:
+		assert(auto_pattern_id != "")
+		var instance = VisibleOnScreenNotifier2D.new()
+		instance.connect("screen_entered",Callable(self,"on_screen").bind(true))
+		instance.connect("screen_exited",Callable(self,"on_screen").bind(false))
+	elif auto_distance_from != NodePath(): set_physics_process(true)
+	elif auto_pattern_id:
+		if auto_start_after_time > float(0.0):
+			await get_tree().create_timer(auto_start_after_time).timeout
+		auto_call = true
+		set_physics_process(active)
+		
 	if active and auto_pattern_id:
 		if auto_start_after_time > float(0.0):
 			await get_tree().create_timer(auto_start_after_time).timeout
@@ -56,9 +57,10 @@ func _ready():
 		set_physics_process(active)
 		
 	if rotating_speed > 0: set_physics_process(active)
-	
+		
 	if active and pool_amount > 0:
-		Spawning.create_pool(Spawning.pattern(auto_pattern_id)["bullet"], shared_area_name, pool_amount)
+		var props = Spawning.pattern(auto_pattern_id)["bullet"]
+		Spawning.create_pool(props, shared_area_name, pool_amount, !Spawning.bullet(props).has("anim_idle_collision"))
 
 func _physics_process(delta):
 	if Engine.is_editor_hint(): return
@@ -70,7 +72,7 @@ func _physics_process(delta):
 		Spawning.spawn(self, auto_pattern_id, shared_area_name)
 		can_respawn = false
 		if not rotating_speed > 0: set_physics_process(false)
-	
+		
 	rotate(rotating_speed)
 
 
@@ -90,29 +92,29 @@ func trig_timeout():
 
 func checkTrigger():
 	if trig_container: trig_container.checkTriggers(self)
-	
+
 func _get_property_list() -> Array:
 	return [
 		{
 			name = "active",
 			type = TYPE_BOOL,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "auto_pattern_id",
 			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "shared_area_name",
 			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "rotating_speed",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "pool_amount",
 			type = TYPE_INT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Autostart & Triggering",
 			type = TYPE_NIL,
@@ -121,19 +123,19 @@ func _get_property_list() -> Array:
 		},{
 			name = "auto_start_on_cam",
 			type = TYPE_BOOL,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "auto_start_after_time",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "auto_start_at_distance",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "auto_distance_from",
 			type = TYPE_NODE_PATH,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Advanced Triggering",
 			type = TYPE_NIL,
@@ -142,7 +144,7 @@ func _get_property_list() -> Array:
 		},{
 			name = "trigger_id",
 			type = TYPE_NODE_PATH,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Random",
 			type = TYPE_NIL,

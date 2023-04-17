@@ -19,21 +19,21 @@ func _ready():
 			Spawning.new_trigger(id+"/"+str(triggers.find(i)), i)
 		for j in patterns.size(): Spawning.new_pattern(id+"/"+str(j), patterns[j])
 		Spawning.new_container(self)
-		
+
 		if advanced_controls != "":
 			commands = advanced_controls.split("\n", false)
 			for line in commands.size(): if "=" in commands[line]:
 				commands[line] = commands[line].split("=",false)
 
 
-func define_trigger(res:Array, t:String, b:Dictionary, rid:RID):
+func define_trigger(res:Array, t:String, b:Dictionary, rid):
 	var curr_t = Spawning.trigger(id+"/"+t)
 	if not res.has(curr_t.resource_name): res.append(curr_t.resource_name)
 	if curr_t.resource_name == "TrigTime":
 		get_tree().create_timer(curr_t.time).connect("timeout",Callable(Spawning,"trig_timeout").bind(b, rid))
 
 
-func getCurrentTriggers(b:Dictionary, rid:RID):
+func getCurrentTriggers(b:Dictionary, rid):
 	if b["trigger_counter"] < 0: return
 	var res:Array = []
 	var list = commands[b["trigger_counter"]][0]
@@ -57,7 +57,7 @@ func resetTriggers(b:Dictionary):
 	b["trig_collider"] = null
 
 
-func checkTriggers(b:Dictionary, rid:RID):
+func checkTriggers(b:Dictionary, rid):
 	if b["trigger_counter"] < 0: return
 	var ok = false
 	var cond_index:int = 0
@@ -84,7 +84,7 @@ func checkTriggers(b:Dictionary, rid:RID):
 			ok=false
 			break
 	else: ok = checkTrigger(b, list)
-	
+
 	if ok:
 		list = commands[b["trigger_counter"]][1]
 		if "/" in list:
@@ -97,14 +97,14 @@ func checkTriggers(b:Dictionary, rid:RID):
 			list = list.split("+")
 			for p in list: Spawning.spawn(b, id+"/"+p, b["shared_area"])
 		else: Spawning.spawn(b, id+"/"+list, b["shared_area"])
-		
+
 		if b["trigger_counter"]+1 < commands.size():
 			list = commands[b["trigger_counter"]+1].split(">")
 			if list[0]:
 				if not b["trig_iter"].has(b["trigger_counter"]+1):
 					b["trig_iter"][b["trigger_counter"]+1] = int(list[0])-1
 				else: b["trig_iter"][b["trigger_counter"]+1] -= 1
-				
+
 				if b["trig_iter"][b["trigger_counter"]+1] > 0: b["trigger_counter"] = int(list[1])
 				else: b["trigger_counter"] += 2
 			elif list[1]:
@@ -113,14 +113,14 @@ func checkTriggers(b:Dictionary, rid:RID):
 				else: b["trigger_counter"] = int(list[1])
 			else: b["trigger_counter"] += 2
 			if b["trigger_counter"] >= commands.size(): b["trigger_counter"] = -1
-			
+
 			resetTriggers(b)
 			getCurrentTriggers(b, rid)
 		else: return true
 
 func checkTrigger(b:Dictionary, t_id:String):
 	var t = Spawning.trigger(id+"/"+t_id)
-	
+
 	match t.resource_name:
 		"TrigCol":
 			if t.group_to_collide != "" and t.group_to_collide in b["trig_collider"].get_groups(): return true;
