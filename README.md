@@ -17,6 +17,13 @@ As a BulletHell dev myself, my aim is to create a plugin able to recreate ALL th
 
 The plugin has 4 custom nodes and a bunch of resources you can use to create all the complex attack patterns without coding (but some things are just much more easier to do by code, I didn't make it with the goal that someone who doesn't know how to code could use it). Just drag and drop them in your scene, fill up the properties you want and watch as the magic happens.
 
+![Godot_v4 0-stable_win64_kKgJZaEScg](https://user-images.githubusercontent.com/74102789/232424299-f37086cc-1e79-421f-a0b8-91a93c53f74e.gif)
+![Godot_v4 0-stable_win64_9tcJjfETCc](https://user-images.githubusercontent.com/74102789/232424341-ead8e0e5-31b0-46b1-a679-71896bbf4e42.gif)
+![Godot_v4 0-stable_win64_5Dstv76K6b](https://user-images.githubusercontent.com/74102789/232424373-27c334ba-47e1-4908-bb17-34a4a3ad02a0.gif)
+![Godot_v4 0-stable_win64_LJrtOJvI9x](https://user-images.githubusercontent.com/74102789/232424433-88b62875-cf6f-4037-9fda-3159a450c333.gif)
+![Godot_v4 0-stable_win64_O3nX5Jenfm](https://user-images.githubusercontent.com/74102789/232424505-621dc350-94d0-423b-8a09-1ed2408d7965.gif)
+
+
 I also provide you with a full documentation on how to use everything. See next paragraph.
 
 ## Installation
