@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://cvx1mnumf2p38"]
+[gd_scene load_steps=25 format=3 uid="uid://cvx1mnumf2p38"]
 
 [ext_resource type="Script" path="res://addons/BulletUpHell/ExampleScenes/ExampleScene.gd" id="1_3jldb"]
 [ext_resource type="Script" path="res://addons/BulletUpHell/BuHPattern.gd" id="2_ah2t8"]
@@ -27,8 +27,6 @@ follows_parent = false
 forced_angle = 0.0
 forced_target = NodePath("")
 forced_pattern_lookat = true
-other_scene = ""
-other_props = {}
 cooldown_stasis = false
 cooldown_spawn = 5.0
 cooldown_shoot = 0.0
@@ -81,8 +79,6 @@ follows_parent = false
 forced_angle = 0.0
 forced_target = NodePath("")
 forced_pattern_lookat = true
-other_scene = ""
-other_props = {}
 cooldown_stasis = false
 cooldown_spawn = 5.0
 cooldown_shoot = 0.0
@@ -140,8 +136,6 @@ follows_parent = false
 forced_angle = 0.0
 forced_target = NodePath("")
 forced_pattern_lookat = true
-other_scene = ""
-other_props = {}
 cooldown_stasis = false
 cooldown_spawn = 5.0
 cooldown_shoot = 0.0
@@ -200,8 +194,6 @@ follows_parent = false
 forced_angle = 0.0
 forced_target = NodePath("")
 forced_pattern_lookat = true
-other_scene = ""
-other_props = {}
 cooldown_stasis = false
 cooldown_spawn = 5.0
 cooldown_shoot = 0.0
@@ -262,8 +254,6 @@ follows_parent = false
 forced_angle = 0.0
 forced_target = NodePath("")
 forced_pattern_lookat = true
-other_scene = ""
-other_props = {}
 cooldown_stasis = false
 cooldown_spawn = 5.0
 cooldown_shoot = 0.0
@@ -322,8 +312,6 @@ follows_parent = false
 forced_angle = 0.0
 forced_target = NodePath("")
 forced_pattern_lookat = true
-other_scene = ""
-other_props = {}
 cooldown_stasis = false
 cooldown_spawn = 5.0
 cooldown_shoot = 0.0
@@ -390,6 +378,7 @@ anim_delete_sfx = -1
 spec_bounces = 0
 spec_no_collision = false
 spec_modulate_loop = 0.0
+spec_skew = 0.0
 spec_trail_length = 0.0
 spec_trail_width = 0.0
 spec_trail_modulate = Color(1, 1, 1, 1)
@@ -409,9 +398,6 @@ homing_target = NodePath("")
 homing_steer = 0
 homing_time_start = 0
 homing_duration = 999
-beam_length_per_ray = 0.0
-beam_width = 0.0
-beam_bounce_amount = 0
 scale_multi_iterations = 0
 scale_multiplier = SubResource("Curve_2xsyn")
 scale_multi_scale = 1
@@ -457,9 +443,6 @@ r_beam_width_variation = Vector3(0, 0, 0)
 r_scale_multi_curve_choice = []
 r_scale_multi_iter_variation = Vector3(0, 0, 0)
 r_scale_multi_scale_variation = Vector3(0, 0, 0)
-
-[sub_resource type="RectangleShape2D" id="21"]
-size = Vector2(64, 624)
 
 [node name="Node2D" type="Node2D"]
 rotation = 6.28319
@@ -646,25 +629,15 @@ collision_mask = 32
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls"]
 polygon = PackedVector2Array(1024, -8, 1024, 600, 0, 600, 0, 0, -56, 0, -48, 656, 1072, 640, 1056, -64, 0, -64, 8, 0)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls"]
-position = Vector2(504, 288)
-shape = SubResource("21")
-
-[node name="Polygon2D" type="Polygon2D" parent="Walls/CollisionShape2D"]
-position = Vector2(-504, -288)
-scale = Vector2(1, 1.0274)
-polygon = PackedVector2Array(472, 0, 472, 584, 536, 584, 536, 0)
-
 [node name="FPS" type="Label" parent="."]
-visible = false
 offset_right = 40.0
 offset_bottom = 14.0
 
 [node name="Tuto" type="Label" parent="."]
-offset_left = 71.9988
-offset_top = -264.0
-offset_right = 940.999
-offset_bottom = -64.0004
+offset_left = 128.0
+offset_top = 103.999
+offset_right = 997.001
+offset_bottom = 303.999
 text = "Patterns control the spawning positions of the bullets.
 There are different types of patterns.
 Circles, lines, or more complex custom ones (everything is fully explained in the documentation :
