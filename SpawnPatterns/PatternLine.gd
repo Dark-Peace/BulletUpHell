@@ -19,8 +19,8 @@ var forced_target:NodePath
 var forced_pattern_lookat:bool = true
 var follows_parent:bool = false
 
-var other_scene:String
-var other_props:Dictionary = {}
+#var other_scene:String
+#var other_props:Dictionary = {}
 
 var cooldown_stasis:bool = false
 var cooldown_spawn:float = 0.017
@@ -80,41 +80,41 @@ func _get_property_list() -> Array:
 		{
 			name = "offset",
 			type = TYPE_VECTOR2,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "center",
 			type = TYPE_INT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "1, 1000000",
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "symmetrical",
 			type = TYPE_BOOL,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "bullet",
 			type = TYPE_STRING,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "nbr",
 			type = TYPE_INT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "0, 999999",
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "pattern_angle",
 			type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "-3.1416, 3.1416",
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "iterations",
 			type = TYPE_INT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "follows_parent",
 			type = TYPE_BOOL,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Forced Angle",
 			type = TYPE_NIL,
@@ -125,31 +125,33 @@ func _get_property_list() -> Array:
 			type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "-3.1416, 3.1416",
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "forced_target",
 			type = TYPE_NODE_PATH,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "forced_pattern_lookat",
 			type = TYPE_BOOL,
-			usage = PROPERTY_USAGE_DEFAULT 
-		},{
-			name = "Non Bullet Spawn",
-			type = TYPE_NIL,
-			hint_string = "other_",
-			usage = PROPERTY_USAGE_GROUP
-		},{
-			name = "other_scene",
-			type = TYPE_STRING,
-			hint = PROPERTY_HINT_FILE,
-			hint_string = "*.tscn",
-			usage = PROPERTY_USAGE_DEFAULT 
-		},{
-			name = "other_props",
-			type = TYPE_DICTIONARY,
-			usage = PROPERTY_USAGE_DEFAULT 
-		},{
+			usage = PROPERTY_USAGE_DEFAULT
+		},
+#		{
+#			name = "Non Bullet Spawn",
+#			type = TYPE_NIL,
+#			hint_string = "other_",
+#			usage = PROPERTY_USAGE_GROUP
+#		},{
+#			name = "other_scene",
+#			type = TYPE_STRING,
+#			hint = PROPERTY_HINT_FILE,
+#			hint_string = "*.tscn",
+#			usage = PROPERTY_USAGE_DEFAULT
+#		},{
+#			name = "other_props",
+#			type = TYPE_DICTIONARY,
+#			usage = PROPERTY_USAGE_DEFAULT
+#		},
+		{
 			name = "Cooldowns",
 			type = TYPE_NIL,
 			hint_string = "cooldown",
@@ -157,23 +159,23 @@ func _get_property_list() -> Array:
 		},{
 			name = "cooldown_stasis",
 			type = TYPE_BOOL,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "cooldown_spawn",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "cooldown_shoot",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "cooldown_next_spawn",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "cooldown_next_shoot",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Wait",
 			type = TYPE_NIL,
@@ -184,21 +186,21 @@ func _get_property_list() -> Array:
 			type = TYPE_INT,
 			hint = PROPERTY_HINT_ENUM,
 			hint_string = LATENCE,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "wait_tween_momentum",
 			type = TYPE_INT,
 			hint = PROPERTY_HINT_ENUM,
 			hint_string = MOMENTUM,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "wait_tween_length",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "wait_tween_time",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Layers",
 			type = TYPE_NIL,
@@ -209,25 +211,25 @@ func _get_property_list() -> Array:
 			type = TYPE_INT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "0, 999999",
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "layer_cooldown_spawn",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "layer_pos_offset",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "layer_speed_offset",
 			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "layer_angle_offset",
 			type = TYPE_FLOAT,
 			hint = PROPERTY_HINT_RANGE,
 			hint_string = "-3.1416, 3.1416",
-			usage = PROPERTY_USAGE_DEFAULT 
+			usage = PROPERTY_USAGE_DEFAULT
 		},{
 			name = "Random",
 			type = TYPE_NIL,
