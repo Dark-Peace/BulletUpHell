@@ -59,6 +59,8 @@ enum SYMTYPE{ClosedShape,Line}
 enum CURVE_TYPE{None,LoopFromStart,OnceThenDie,OnceThenStay,LoopFromEnd}
 enum LIST_ENDS{Stop, Loop, Reverse}
 
+var global_reset_counter:int = 0
+
 
 func _ready():
 	if Engine.is_editor_hint(): return
@@ -74,13 +76,38 @@ func _ready():
 		assert(a is Area2D)
 		a.connect("area_shape_entered",Callable(self,"bullet_collide_area").bind(a))
 		a.connect("body_shape_entered",Callable(self,"bullet_collide_body").bind(a))
-#		a.set_meta("ShapeCount", 0)
+		a.set_meta("ShapeCount", 0)
 	$Bouncy.global_position = UNACTIVE_ZONE
 	var instance
 	for s in sfx_list:
 		instance = AudioStreamPlayer.new()
 		instance.stream = s
 		$SFX.call_deferred("add_child",instance)
+
+
+func reset(minimal:bool=false):
+	global_reset_counter += 1
+	inactive_pool.clear()
+	poolBullets.clear()
+	poolQueue.clear()
+	poolTimes.clear()
+	time = 0
+	_delta = 0
+	for a in $SharedAreas.get_children(): a.set_meta("ShapeCount", 0)
+	$Bouncy.global_position = UNACTIVE_ZONE
+	
+	if not minimal:
+		arrayContainers.clear()
+		arrayInstances.clear()
+		arrayPatterns.clear()
+		arrayTriggers.clear()
+		arrayProps.clear()
+	else:
+		for array in [arrayContainers, arrayInstances, arrayPatterns, arrayProps]:
+			for elem in array.keys():
+				if elem[0] == "@": continue
+				array.erase(elem)
+	
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint(): return
@@ -175,8 +202,10 @@ func create_pool(bullet:String, shared_area:String, amount:int, object:bool=fals
 	else:
 		var colID:String = props.get("anim_spawn_collision", props["anim_idle_collision"])
 		var shared_rid:RID = get_shared_area_rid(shared_area)
+		var count:int = Phys.area_get_shape_count(shared_rid)
+		$SharedAreas.get_node(shared_area).set_meta("ShapeCount", $SharedAreas.get_node(shared_area).get_meta("ShapeCount", 0)+amount) # Warning, bad sync possible ?
 		for i in amount:
-			inactive_pool[bullet].append([create_shape(shared_rid, colID), shared_area])
+			inactive_pool[bullet].append([create_shape(shared_rid, colID, true, count+i), shared_area])
 	inactive_pool["__SIZE__"+bullet] += amount
 
 # return RID for default bullets OR object reference for scenes
@@ -197,7 +226,8 @@ func wake_from_pool(bullet:String, queued_instance:Dictionary, shared_area:Strin
 
 func back_to_grave(bullet:String, bID):
 	inactive_pool[bullet].append([bID, poolBullets[bID]["shared_area"].name])
-	poolBullets.erase(bID)
+#	poolBullets.erase(bID)
+	poolBullets[bID]["state"] = BState.QueuedFree
 	if bID is Node2D:
 		bID.get_parent().remove_child(bID)
 
@@ -210,6 +240,7 @@ func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionar
 		queued_instance["rotation"] = pattern.forced_angle
 
 func create_bullet_instance_dict(queued_instance:Dictionary, bullet_props:Dictionary, pattern:NavigationPolygon, l:int):
+	queued_instance["shape_disabled"] = true
 	if pattern.bullet in no_culling_for: queued_instance["no_culling"] = true
 	queued_instance["speed"] = bullet_props.speed + pattern.layer_speed_offset*l
 	queued_instance["vel"] = Vector2()
@@ -239,6 +270,7 @@ func set_spawn_data(queued_instance:Dictionary, bullet_props:Dictionary, pattern
 
 func spawn(spawner, id:String, shared_area="0"):
 	assert(arrayPatterns.has(id))
+	var local_reset_counter:int = global_reset_counter
 	var bullets:Array
 	var pattern:NavigationPolygon = arrayPatterns[id]
 	var iter:int = pattern.iterations
@@ -268,7 +300,6 @@ func spawn(spawner, id:String, shared_area="0"):
 				queued_instance["source_node"] = spawner
 				queued_instance["state"] = BState.Unactive
 				if not is_object:
-#					shared_area_node.set_meta("ShapeCount", shared_area_node.get_meta("ShapeCount")+pattern.nbr) # Warning, bad sync possible ?
 					queued_instance["colID"] = bullet_props.get("anim_spawn_collision", bullet_props["anim_idle_collision"])
 					queued_instance = create_bullet_instance_dict(queued_instance, bullet_props, pattern, l)
 				elif is_bullet_node: queued_instance = create_bullet_instance_dict(queued_instance, bullet_props, pattern, l)
@@ -301,6 +332,7 @@ func spawn(spawner, id:String, shared_area="0"):
 			if l < pattern.layer_nbr-1: await get_tree().create_timer(pattern.layer_cooldown_spawn).timeout
 		if iter > 0: iter -= 1
 		await get_tree().create_timer(pattern.cooldown_spawn).timeout
+		if local_reset_counter != global_reset_counter: return
 
 func _plan_spawning(pattern:NavigationPolygon, bullets:Array):
 	if pattern.cooldown_next_spawn == 0:
@@ -363,7 +395,7 @@ func _plan_spawning(pattern:NavigationPolygon, bullets:Array):
 	bullets.clear()
 
 
-func create_shape(shared_rid:RID, ColID:String, init:bool=false) -> RID:
+func create_shape(shared_rid:RID, ColID:String, init:bool=false, count:int=0) -> RID:
 	var new_shape:RID
 	var template_shape = arrayShapes[ColID][0]
 	if template_shape is CircleShape2D:
@@ -393,6 +425,8 @@ func create_shape(shared_rid:RID, ColID:String, init:bool=false) -> RID:
 
 	Phys.area_add_shape(shared_rid, new_shape, \
 		Transform2D(arrayShapes[ColID][2],arrayShapes[ColID][1]+(UNACTIVE_ZONE*int(init))))
+	if count == 0: count = Phys.area_get_shape_count(shared_rid)
+	Phys.area_set_shape_disabled(shared_rid, count-1, true)
 	return new_shape
 
 	# bullet base structure
@@ -643,7 +677,7 @@ func check_trig_culling(B:Dictionary):
 	return check_culling(B,CULLTYPE.Trigger)
 
 func check_culling(B:Dictionary,type:int):
-	if B["state"] == BState.Unactive: return false
+	if B["state"] in [BState.Unactive, BState.QueuedFree]: return false
 	var can_cull
 	match type:
 		CULLTYPE.Bullet: can_cull = cull_bullets
@@ -832,7 +866,7 @@ func bullet_movement(delta:float):
 	for b in poolBullets.keys():
 		B = poolBullets[b]
 		
-		if B["state"] == BState.Unactive: continue
+		if B["state"] in [BState.Unactive, BState.QueuedFree]: continue
 		props = B["props"]
 		
 		if B.has("death_counter"):
@@ -938,15 +972,27 @@ func bullet_movement(delta:float):
 	var shared_rid:RID; var Brid:RID;
 	for area in $SharedAreas.get_children():
 		shared_rid = area.get_rid()
-		for b in Phys.area_get_shape_count(shared_rid):
-#		for b in area.get_meta("ShapeCount"):
+#		for b in Phys.area_get_shape_count(shared_rid):
+		for b in area.get_meta("ShapeCount"):
 			Brid = get_RID_from_index(shared_rid,b) # TODO change that for optimisation
 #			if not poolBullets.has(Brid): continue
 			B = poolBullets.get(Brid, {})
 			if B.is_empty() or B["state"] == BState.Unactive or check_move_culling(B): continue
+
+			# erase destroyed bullets
+			if B["state"] == BState.QueuedFree:
+				Phys.area_set_shape_disabled(shared_rid, b, true)
+				poolBullets.erase(Brid)
+				continue
+
+			# move active bullets
 			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0), B.get("scale",Vector2(props["scale"],props["scale"])), props.get("skew",0), B["position"]))
 #			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0),B["position"]).scaled(B.get("scale",Vector2(props["scale"],props["scale"]))))
 
+			# active collision for new bullets
+			if B["shape_disabled"]:
+				Phys.area_set_shape_disabled(shared_rid, b, false)
+				B["shape_disabled"] = false
 
 func _on_Homing_timeout(B:Dictionary, start:bool):
 	if start:

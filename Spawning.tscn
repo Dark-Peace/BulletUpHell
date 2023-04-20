@@ -49,9 +49,7 @@ points = PackedVector2Array(0, 0)
 z_index = 999
 script = ExtResource("1")
 rand_variation_list = Array[Curve]([SubResource("4")])
-cull_trigger = false
-cull_partial_move = false
-cull_fixed_screen = null
+cull_fixed_screen = true
 
 [node name="SharedAreas" type="Node2D" parent="."]
 

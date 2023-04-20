@@ -14,7 +14,7 @@ func _ready():
 	
 	if not props is ObjectProps:
 		if props.homing_type == props.TARGET_TYPE.ListPositions:
-			props.homing_list = props["homing_list_pos"].duplicate()
+			props.homing_list = props.homing_list_pos.duplicate()
 		elif props.homing_type == props.TARGET_TYPE.ListNodes:
 			props.homing_list = []
 			for n in props.homing_list_nodes: props.homing_list.append(get_node(n))
