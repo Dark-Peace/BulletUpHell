@@ -71,6 +71,28 @@ func _ready():
 		instance.stream = s
 		$SFX.call_deferred("add_child",instance)
 
+var global_reset_counter:int = 0
+func reset(minimal:bool=false):
+	global_reset_counter += 1
+	pooling.clear()
+	poolBullets.clear()
+	poolQueue.clear()
+	poolTimes.clear()
+	time = 0
+	_delta = 0
+	$Bouncy.global_position = UNACTIVE_ZONE
+	
+	if not minimal:
+		arrayContainers.clear()
+		arrayPatterns.clear()
+		arrayTriggers.clear()
+		arrayProps.clear()
+	else:
+		for array in [arrayContainers, arrayPatterns, arrayProps, arrayTriggers]:
+			for elem in array.keys():
+				if elem[0] == "@": continue
+				array.erase(elem)
+
 #func create_pool():
 #	var _circle_shape
 #	for i in 4000:
@@ -132,6 +154,7 @@ func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionar
 		queued_instance["rotation"] = pattern.forced_angle
 
 func spawn(target, id:String, shared_area="0"):
+	var local_reset_counter:int = global_reset_counter
 	assert(arrayPatterns.has(id))
 	var bullets:Array
 	var pattern = arrayPatterns[id]
@@ -172,7 +195,7 @@ func spawn(target, id:String, shared_area="0"):
 						queued_instance["spawn_pos"] = Vector2(cos(angle)*pattern.radius,sin(angle)*pattern.radius).rotated(pattern.pattern_angle)
 						queued_instance["rotation"] = angle + bullet_props.angle + pattern.layer_angle_offset*l
 					"PatternLine":
-						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center_pos-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
+						queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
 						queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + pattern.pattern_angle
 					"PatternOne":
 						queued_instance["spawn_pos"] = Vector2()
@@ -247,6 +270,7 @@ func spawn(target, id:String, shared_area="0"):
 			if l < pattern.layer_nbr-1: yield(get_tree().create_timer(pattern.layer_cooldown_spawn), "timeout")
 		if iter > 0: iter -= 1
 		yield(get_tree().create_timer(pattern.cooldown_spawn), "timeout")
+		if local_reset_counter != global_reset_counter: return
 
 
 func create_shape(shared_rid:RID, ColID:String, init:bool=false) -> RID:
@@ -835,11 +859,11 @@ func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape
 #		var rest_info:Dictionary = state.get_rest_info(param)
 #		print(rest_info)
 #
-#	if body.is_in_group("Player"):
-#		delete_bullet(rid)
+	if body.is_in_group("Player"):
+		delete_bullet(rid)
 ##		$CollisionShape2D.set_deferred("disabled", true)
 ##		$AnimationPlayer.play("Delete")
-#	elif B["props"]["death_from_collision"]: delete_bullet(rid)
+	elif B["props"]["death_from_collision"]: delete_bullet(rid)
 
 func bounce(B:Dictionary, shared_area:Area2D):
 	$Bouncy/CollisionShape2D.shape = arrayShapes[B["colID"]][0]
