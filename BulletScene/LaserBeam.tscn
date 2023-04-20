@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk1xxjdlsbpmm"]
+
+[ext_resource type="Script" path="res://addons/BulletUpHell/BulletScene/LaserBeam.gd" id="1_2i275"]
+
+[node name="Laser" type="Area2D"]
+position = Vector2(169, 64)
+script = ExtResource("1_2i275")
+BOUNCE_OFFSET = 10.0
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 80, 0)
+default_color = Color(1, 0, 0, 1)
+joint_mode = 2
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+enabled = false
+target_position = Vector2(80, 0)
+
+[connection signal="area_shape_entered" from="." to="." method="_on_area_shape_entered"]
+[connection signal="body_shape_entered" from="." to="." method="_on_body_shape_entered"]
