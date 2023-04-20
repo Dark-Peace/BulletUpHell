@@ -623,8 +623,8 @@ r_start_time_choice = ""
 r_start_time_variation = Vector3(0, 0, 0)
 
 [node name="Walls" type="StaticBody2D" parent="."]
-collision_layer = 16
-collision_mask = 32
+collision_layer = 17
+collision_mask = 33
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls"]
 polygon = PackedVector2Array(1024, -8, 1024, 600, 0, 600, 0, 0, -56, 0, -48, 656, 1072, 640, 1056, -64, 0, -64, 8, 0)
