@@ -71,6 +71,28 @@ func _ready():
 		instance.stream = s
 		$SFX.call_deferred("add_child",instance)
 
+var global_reset_counter:int = 0
+func reset(minimal:bool=false):
+	global_reset_counter += 1
+	pooling.clear()
+	poolBullets.clear()
+	poolQueue.clear()
+	poolTimes.clear()
+	time = 0
+	_delta = 0
+	$Bouncy.global_position = UNACTIVE_ZONE
+	
+	if not minimal:
+		arrayContainers.clear()
+		arrayPatterns.clear()
+		arrayTriggers.clear()
+		arrayProps.clear()
+	else:
+		for array in [arrayContainers, arrayPatterns, arrayProps, arrayTriggers]:
+			for elem in array.keys():
+				if elem[0] == "@": continue
+				array.erase(elem)
+
 #func create_pool():
 #	var _circle_shape
 #	for i in 4000:
@@ -132,6 +154,7 @@ func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionar
 		queued_instance["rotation"] = pattern.forced_angle
 
 func spawn(target, id:String, shared_area="0"):
+	var local_reset_counter:int = global_reset_counter
 	assert(arrayPatterns.has(id))
 	var bullets:Array
 	var pattern = arrayPatterns[id]
@@ -247,6 +270,7 @@ func spawn(target, id:String, shared_area="0"):
 			if l < pattern.layer_nbr-1: yield(get_tree().create_timer(pattern.layer_cooldown_spawn), "timeout")
 		if iter > 0: iter -= 1
 		yield(get_tree().create_timer(pattern.cooldown_spawn), "timeout")
+		if local_reset_counter != global_reset_counter: return
 
 
 func create_shape(shared_rid:RID, ColID:String, init:bool=false) -> RID:
