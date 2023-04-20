@@ -23,8 +23,6 @@ The plugin has 4 custom nodes and a bunch of resources you can use to create all
 ![Godot_v4 0-stable_win64_LJrtOJvI9x](https://user-images.githubusercontent.com/74102789/232424433-88b62875-cf6f-4037-9fda-3159a450c333.gif)
 ![Godot_v4 0-stable_win64_O3nX5Jenfm](https://user-images.githubusercontent.com/74102789/232424505-621dc350-94d0-423b-8a09-1ed2408d7965.gif)
 
-I also provide you with a full documentation on how to use everything. See next paragraph.
-
 ## Installation
 
 Download the latest release from the Release section. For the rest of the installation and the documentation of all my plugins, check this : [BottledPluginsDocumentation](https://docs.google.com/document/d/1y2aPsn72dOxQ-wBNGqLlQvrw9-SV_z12a1MradBglF4/edit?usp=sharing)
