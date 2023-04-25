@@ -139,10 +139,10 @@ func _get_property_list() -> Array:
 		},{
 			name = "Advanced Triggering",
 			type = TYPE_NIL,
-			hint_string = "trigger_",
+			hint_string = "trig_",
 			usage = PROPERTY_USAGE_GROUP
 		},{
-			name = "trigger_id",
+			name = "trig_container",
 			type = TYPE_NODE_PATH,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
