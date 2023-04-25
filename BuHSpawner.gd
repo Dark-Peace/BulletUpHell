@@ -103,7 +103,7 @@ func reset(minimal:bool=false):
 		arrayTriggers.clear()
 		arrayProps.clear()
 	else:
-		for array in [arrayContainers, arrayInstances, arrayPatterns, arrayProps]:
+		for array in [arrayContainers, arrayInstances, arrayPatterns, arrayProps, arrayTriggers]:
 			for elem in array.keys():
 				if elem[0] == "@": continue
 				array.erase(elem)
@@ -210,7 +210,10 @@ func create_pool(bullet:String, shared_area:String, amount:int, object:bool=fals
 
 # return RID for default bullets OR object reference for scenes
 func wake_from_pool(bullet:String, queued_instance:Dictionary, shared_area:String, object:bool=false):
-	if inactive_pool[bullet].is_empty():
+	if not inactive_pool.has(bullet):
+		push_warning("WARNING : there's no bullet pool for bullet of ID "+bullet+" . Create a pool upon game load to avoid lag by calling Spawning.create_pool()")
+		create_pool(bullet, queued_instance["shared_area"].name, 50, object) # TODO : 50 is arbitrary, there might be lag if it needs more
+	elif inactive_pool[bullet].is_empty():
 		push_warning("WARNING : bullet pool for bullet of ID "+bullet+" is empty. Create bigger one next time to avoid lag.")
 		create_pool(bullet, queued_instance["shared_area"].name, max(inactive_pool["__SIZE__"+bullet]/10, 50), object)
 	
@@ -268,7 +271,7 @@ func set_spawn_data(queued_instance:Dictionary, bullet_props:Dictionary, pattern
 			queued_instance["spawn_pos"] = pattern.pos[randi()%pattern.pooling][i]
 			queued_instance["rotation"] = bullet_props.angle + ori_angle
 
-func spawn(spawner, id:String, shared_area="0"):
+func spawn(spawner, id:String, shared_area:String="0"):
 	assert(arrayPatterns.has(id))
 	var local_reset_counter:int = global_reset_counter
 	var bullets:Array
@@ -700,6 +703,7 @@ func clear_all_offscreen_bullets():
 	for b in poolBullets.keys(): check_bullet_culling(poolBullets[b],b)
 
 func delete_bullet(b):
+	if not poolBullets.has(b): return
 	var B = poolBullets[b]
 	if B["props"].has("anim_delete_sfx"): $SFX.get_child(B["props"]["anim_delete_sfx"]).play()
 #	if not B["props"].has("instance_id"):
@@ -716,6 +720,9 @@ func get_bullets_in_radius(origin:Vector2, radius:float):
 
 func get_shared_area_rid(shared_area_name:String):
 	return $SharedAreas.get_node(shared_area_name).get_rid()
+
+func get_shared_area(shared_area_name:String):
+	return $SharedAreas.get_node(shared_area_name)
 
 func change_shared_area(b:Dictionary, rid:RID, idx:int, new_area:Area2D):
 	Phys.area_remove_shape(b["shared_area"].get_rid(),idx)

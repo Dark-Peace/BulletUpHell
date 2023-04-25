@@ -9,8 +9,9 @@ var auto_start_at_distance:float = 5
 var auto_distance_from:NodePath
 var trigger_container:NodePath
 
-var trig_container
+var trig_container:TriggerContainer
 var trigger_counter = 0
+var trig_iter:Dictionary
 var trigger_timeout = false
 var trig_collider
 var trig_signal
@@ -18,6 +19,7 @@ var trig_signal
 var rotating_speed = 0.0
 var active = true
 var shared_area_name = "0"
+var shared_area
 var pool_amount:int = 50
 
 var r_randomisation_chances:float
@@ -33,6 +35,10 @@ var can_respawn = true
 
 func _ready():
 	if Engine.is_editor_hint(): return
+	
+	if shared_area_name != "":
+		shared_area = Spawning.get_shared_area(shared_area_name)
+	else: push_error("Spawnpoint doesn't have any shared_area")
 	
 	if trigger_container:
 		trig_container = get_node(trigger_container)
@@ -61,6 +67,8 @@ func _ready():
 	if active and pool_amount > 0:
 		var props = Spawning.pattern(auto_pattern_id)["bullet"]
 		Spawning.create_pool(props, shared_area_name, pool_amount, !Spawning.bullet(props).has("anim_idle_collision"))
+		
+		if trig_container: trig_container.create_pool(shared_area_name, pool_amount)
 
 func _physics_process(delta):
 	if Engine.is_editor_hint(): return
@@ -91,7 +99,7 @@ func trig_timeout():
 	checkTrigger()
 
 func checkTrigger():
-	if trig_container: trig_container.checkTriggers(self)
+	if trig_container: trig_container.checkTriggers(self, self)
 
 func _get_property_list() -> Array:
 	return [
@@ -139,10 +147,10 @@ func _get_property_list() -> Array:
 		},{
 			name = "Advanced Triggering",
 			type = TYPE_NIL,
-			hint_string = "trig_",
+			hint_string = "trigger_",
 			usage = PROPERTY_USAGE_GROUP
 		},{
-			name = "trig_container",
+			name = "trigger_container",
 			type = TYPE_NODE_PATH,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{

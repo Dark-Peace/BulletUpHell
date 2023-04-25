@@ -1,10 +1,12 @@
 @tool
 extends Node
+class_name TriggerContainer
 
 @export var id:String
 @export_multiline var advanced_controls:String = ""
 @export var triggers:Array[RichTextEffect] = [null]
 @export var patterns:Array[NavigationPolygon] = [null]
+@export var pool_amount:int = 50
 
 var commands:Array = []
 
@@ -22,9 +24,15 @@ func _ready():
 
 		if advanced_controls != "":
 			commands = advanced_controls.split("\n", false)
-			for line in commands.size(): if "=" in commands[line]:
-				commands[line] = commands[line].split("=",false)
+			for line in commands.size():
+				if "=" in commands[line]:
+					commands[line] = commands[line].split("=",false)
 
+func create_pool(shared_area_name:String, pool_amount:int):
+	if pool_amount <= 0: return
+	for p in patterns:
+		var props = Spawning.pattern(p.bullet)["bullet"]
+		Spawning.create_pool(props, shared_area_name, pool_amount, !Spawning.bullet(props).has("anim_idle_collision"))
 
 func define_trigger(res:Array, t:String, b:Dictionary, rid):
 	var curr_t = Spawning.trigger(id+"/"+t)
@@ -56,12 +64,22 @@ func resetTriggers(b:Dictionary):
 	b["trig_timeout"] = false
 	b["trig_collider"] = null
 
+func applyTrigger(b, list, counter:int, cond_index:int):
+	list = commands[counter][1]
+	if "/" in list:
+		list = list.split("/")
+		if "+" in list:
+			list = list.split("+")
+			for p in list: Spawning.spawn(b, id+"/"+p, b.get("shared_area").name)
+		else: Spawning.spawn(b, id+"/"+list[cond_index], b.get("shared_area").name)
+	elif "+" in list:
+		list = list.split("+")
+		for p in list: Spawning.spawn(b, id+"/"+p, b.get("shared_area").name)
+	else: Spawning.spawn(b, id+"/"+list, b.get("shared_area").name)
 
-func checkTriggers(b:Dictionary, rid):
-	if b["trigger_counter"] < 0: return
-	var ok = false
+func isTriggerChecked(list, b) -> Array:
+	var ok:bool = false
 	var cond_index:int = 0
-	var list = commands[b["trigger_counter"]][0]
 	if "/" in list:
 		list = list.split("/")
 		for sublist in list:
@@ -84,39 +102,52 @@ func checkTriggers(b:Dictionary, rid):
 			ok=false
 			break
 	else: ok = checkTrigger(b, list)
+	return [ok, cond_index]
 
-	if ok:
-		list = commands[b["trigger_counter"]][1]
-		if "/" in list:
-			list = list.split("/")
-			if "+" in list:
-				list = list.split("+")
-				for p in list: Spawning.spawn(b, id+"/"+p, b["shared_area"])
-			else: Spawning.spawn(b, id+"/"+list[cond_index], b["shared_area"])
-		elif "+" in list:
-			list = list.split("+")
-			for p in list: Spawning.spawn(b, id+"/"+p, b["shared_area"])
-		else: Spawning.spawn(b, id+"/"+list, b["shared_area"])
-
-		if b["trigger_counter"]+1 < commands.size():
-			list = commands[b["trigger_counter"]+1].split(">")
-			if list[0]:
-				if not b["trig_iter"].has(b["trigger_counter"]+1):
-					b["trig_iter"][b["trigger_counter"]+1] = int(list[0])-1
-				else: b["trig_iter"][b["trigger_counter"]+1] -= 1
-
-				if b["trig_iter"][b["trigger_counter"]+1] > 0: b["trigger_counter"] = int(list[1])
-				else: b["trigger_counter"] += 2
-			elif list[1]:
-				if list[1] == "q": Spawning.delete_bullet(rid)
-				elif list[1] == "|": b["trigger_counter"] = -1
-				else: b["trigger_counter"] = int(list[1])
-			else: b["trigger_counter"] += 2
-			if b["trigger_counter"] >= commands.size(): b["trigger_counter"] = -1
-
-			resetTriggers(b)
-			getCurrentTriggers(b, rid)
+func checkTriggers(b, rid):
+	if b["trigger_counter"] < 0: return false
+	var trigger_counter:int
+	if b is Dictionary: trigger_counter = b["trigger_counter"]
+	elif b is Node: trigger_counter = b.trigger_counter
+	var list = commands[trigger_counter][0]
+	
+	var trigger_result:Array = isTriggerChecked(list, b)
+	if trigger_result[0]:
+		applyTrigger(b, list, trigger_counter, trigger_result[1])
+	
+		if trigger_counter+1 < commands.size():
+			updateBase(b, list, trigger_counter, rid)
 		else: return true
+
+func updateBase(b, list, trigger_counter:int, rid):
+	list = commands[trigger_counter+1].split(">")
+	var isNode = (b is Node)
+	if list[0]:
+		if not b.get("trig_iter").has(trigger_counter+1):
+			b.get("trig_iter")[trigger_counter+1] = int(list[0])-1
+		else: b.get("trig_iter")[trigger_counter+1] -= 1
+		
+		if b.get("trig_iter")[trigger_counter+1] > 0: setTriggerCounter(isNode, b, int(list[1]))
+		else: incTriggerCounter(isNode, b, 2)
+	elif list[1]:
+		if list[1] == "q":
+			if not isNode: Spawning.delete_bullet(rid)
+			else: rid.queue_free()
+		elif list[1] == "|": incTriggerCounter(isNode, b, -1)
+		else: setTriggerCounter(isNode, b, int(list[1])) #b["trigger_counter"] = int(list[1])
+	else: incTriggerCounter(isNode, b, 2)
+	if trigger_counter >= commands.size(): incTriggerCounter(isNode, b, -1)
+	
+	resetTriggers(b)
+	getCurrentTriggers(b, rid)
+
+func setTriggerCounter(node:bool, b, value:int):
+	if node: b.trigger_counter = value
+	else: b["trigger_counter"] = value
+
+func incTriggerCounter(node:bool, b, value:int):
+	if node: b.trigger_counter += value
+	else: b["trigger_counter"] += value
 
 func checkTrigger(b:Dictionary, t_id:String):
 	var t = Spawning.trigger(id+"/"+t_id)
