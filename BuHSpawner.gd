@@ -1047,10 +1047,12 @@ func target_from_list(B:Dictionary, do:bool=true):
 	if not do: return
 	B["homing_target"] = B["props"]["homing_list"][B["homing_counter"]]
 
-func trig_timeout(b:Dictionary, rid):
-	if check_trig_culling(b): return
-	b["trig_timeout"] = true
-	b["trig_container"].checkTriggers(b,rid)
+func trig_timeout(b, rid):
+	if b is Node: b.trigger_timeout = true
+	else:
+		if check_trig_culling(b): return
+		b["trig_timeout"] = true
+	b.get("trig_container").checkTriggers(b,rid)
 
 
 
