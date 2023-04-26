@@ -963,8 +963,8 @@ func bullet_movement(delta:float):
 			if B.has("spawn_pos") and not props.has("curve"): B["position"] += B["spawn_pos"]
 			
 		# position triggers
-		if B.has("trig_container") and (B["state"] == BState.Moving or not props["trigger_wait_for_shot"]) \
-			and not check_trig_culling(B) and B["trig_types"].has("TrigPos"):
+		if B.has("trig_container") and B["trig_types"].has("TrigPos") \
+			and (B["state"] == BState.Moving or not props["trigger_wait_for_shot"]) and not check_trig_culling(B):
 				B["trig_container"].checkTriggers(B,b)
 		
 		check_bullet_culling(B,b)
@@ -1058,16 +1058,19 @@ func trig_timeout(b, rid):
 
 
 func bullet_collide_area(area_rid:RID,area:Area2D,area_shape_index:int,local_shape_index:int,shared_area:Area2D) -> void:
-	## emit signal
+	## uncomment if you use something from below
 #	var rid = get_RID_from_index(shared_area.get_rid(), local_shape_index)
+	
+	## emit signal
 #	if not poolBullets.has(rid): return
 #	var B = poolBullets[rid]
 #	bullet_collided_area.emit(area,area_shape_index,B,local_shape_index,shared_area)
-	##
+	
+	## uncomment to manage trigger collisions with area collisions
+#	if B["trig_types"].has("TrigCol"):
+#		B["trig_collider"] = area
+#		B["trig_container"].checkTriggers(B, rid)
 	pass
-#	if (can_act or not p.trigger_wait_for_shot) and trig_types.has("TrigCol"):
-#		trig_collider = collision.collider
-#		trig_container.checkTriggers(self)
 
 func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape_index:int,shared_area:Area2D) -> void:
 	var rid = get_RID_from_index(shared_area.get_rid(), local_shape_index)
@@ -1081,6 +1084,10 @@ func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape
 		bounce(B, shared_area)
 		B["bounces"] = max(0, B["bounces"]-1)
 	elif body.is_in_group(GROUP_BOUNCE): bounce(B, shared_area)
+	
+	if B.get("trig_types", []).has("TrigCol"):
+		B["trig_collider"] = body
+		B["trig_container"].checkTriggers(B, rid)
 	
 	if body.is_in_group("Player"):
 		delete_bullet(rid)

@@ -102,13 +102,13 @@ func isTriggerChecked(list, b, isNode:bool) -> Array:
 			else: or_ok = checkTrigger(b, sublist, isNode)
 			if not or_ok: cond_index += 1
 			else:
-				ok=true
+				ok = true
 				break
 	elif "+" in list:
 		ok = true
 		list = list.split("+")
 		for t in list: if not checkTrigger(b, t, isNode):
-			ok=false
+			ok = false
 			break
 	else: ok = checkTrigger(b, list, isNode)
 	return [ok, cond_index]
@@ -163,9 +163,10 @@ func checkTrigger(b, t_id:String, isNode:bool):
 	
 	match t.resource_name:
 		"TrigCol":
-			if t.group_to_collide != "" and t.group_to_collide in b.get("trig_collider").get_groups(): return true;
-			elif t.node_collide == b.get("trig_collider"): return true
-			else: return (t.on_bounce and b.get("bounces",0) > 0)
+			if t.group_to_collide != "": return (t.group_to_collide in b.get("trig_collider").get_groups())
+			elif t.node_collide: return t.node_collide == b.get("trig_collider")
+			elif t.on_bounce: return (b.get("bounces", 0) > 0)
+			else: return true
 		"TrigTime":
 			if isNode: return b.trig_timeout(t.time)
 			elif b.get("trig_timeout"): return true
