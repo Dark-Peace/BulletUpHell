@@ -22,6 +22,7 @@ The plugin has 4 custom nodes and a bunch of resources you can use to create all
 ![Godot_v4 0-stable_win64_5Dstv76K6b](https://user-images.githubusercontent.com/74102789/232424373-27c334ba-47e1-4908-bb17-34a4a3ad02a0.gif)
 ![Godot_v4 0-stable_win64_LJrtOJvI9x](https://user-images.githubusercontent.com/74102789/232424433-88b62875-cf6f-4037-9fda-3159a450c333.gif)
 ![Godot_v4 0-stable_win64_O3nX5Jenfm](https://user-images.githubusercontent.com/74102789/232424505-621dc350-94d0-423b-8a09-1ed2408d7965.gif)
+![Godot_v4 0-stable_win64_xVip6jiYaZ](https://user-images.githubusercontent.com/74102789/234537467-4e3e641d-144f-4779-9986-0686fa64c1c3.gif)
 
 
 I also provide you with a full documentation on how to use everything. See next paragraph.
