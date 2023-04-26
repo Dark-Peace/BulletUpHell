@@ -53,4 +53,4 @@ Q: Can I make updates to the plugin ?
 A: Sure, but please tell me about it. Also any feature idea is welcomed.
 
 Q: The alpha version used nodes as bullets, but not the V3.4/V4 and I don't like it.
-A: It was for optimisation's sake. All of the basic features of a node are reproductible with the current system but I'll add node-compatibility in the V4 for Godot 4.
+A: It was for optimisation's sake. All of the basic features of a node are reproductible with the current system but node-compatibility as been added in the V4 for Godot 4.
