@@ -985,6 +985,7 @@ func bullet_movement(delta:float):
 #			if not poolBullets.has(Brid): continue
 			B = poolBullets.get(Brid, {})
 			if B.is_empty() or B["state"] == BState.Unactive or check_move_culling(B): continue
+			props = B["props"]
 
 			# erase destroyed bullets
 			if B["state"] == BState.QueuedFree:
@@ -993,12 +994,13 @@ func bullet_movement(delta:float):
 				continue
 
 			# move active bullets
-			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0), B.get("scale",Vector2(props["scale"],props["scale"])), props.get("skew",0), B["position"]))
+			if not props.get("spec_no_collision", false):
+				Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0), B.get("scale",Vector2(props["scale"],props["scale"])), props.get("skew",0), B["position"]))
 #			Phys.area_set_shape_transform(shared_rid, b,Transform2D(B["rotation"]+B.get("rot_index",0),B["position"]).scaled(B.get("scale",Vector2(props["scale"],props["scale"]))))
 
 			# active collision for new bullets
 			if B["shape_disabled"]:
-				Phys.area_set_shape_disabled(shared_rid, b, false)
+				if not props.get("spec_no_collision", false): Phys.area_set_shape_disabled(shared_rid, b, false)
 				B["shape_disabled"] = false
 
 func _on_Homing_timeout(B:Dictionary, start:bool):

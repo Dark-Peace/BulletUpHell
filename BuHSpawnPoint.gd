@@ -166,18 +166,20 @@ func _get_property_list() -> Array:
 			name = "trigger_container",
 			type = TYPE_NODE_PATH,
 			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "Random",
-			type = TYPE_NIL,
-			hint_string = "r_",
-			usage = PROPERTY_USAGE_GROUP
-		},
-		{ name = "r_randomisation_chances", type = TYPE_FLOAT,
-			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_active_chances", type = TYPE_FLOAT,
-			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_shared_area_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_rotating_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_pattern_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_start_time_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
-		{ name = "r_start_time_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT }]
+		}
+#		,{
+#			name = "Random",
+#			type = TYPE_NIL,
+#			hint_string = "r_",
+#			usage = PROPERTY_USAGE_GROUP
+#		},
+#		{ name = "r_randomisation_chances", type = TYPE_FLOAT,
+#			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
+#		{ name = "r_active_chances", type = TYPE_FLOAT,
+#			hint = PROPERTY_HINT_RANGE, hint_string = "0, 1", usage = PROPERTY_USAGE_DEFAULT },
+#		{ name = "r_shared_area_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
+#		{ name = "r_rotating_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT },
+#		{ name = "r_pattern_choice", type = TYPE_ARRAY, usage = PROPERTY_USAGE_DEFAULT },
+#		{ name = "r_start_time_choice", type = TYPE_STRING, usage = PROPERTY_USAGE_DEFAULT },
+#		{ name = "r_start_time_variation", type = TYPE_VECTOR3, usage = PROPERTY_USAGE_DEFAULT }
+	]
