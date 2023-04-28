@@ -743,9 +743,9 @@ func get_RID_from_index(source_area:RID, index:int) -> RID:
 	return Phys.area_get_shape(source_area, index)
 
 func change_property(type:String, id:String, prop:String, new_value):
-	var res = call_deferred(type, id)
 	match type:
-		"pattern","container","trigger": res.set(prop, new_value)
+		"pattern","container","trigger":
+			call(type, id).set(prop, new_value)
 		"bullet": bullet(id)[prop] = new_value
 
 func switch_property_of_bullet(b:Dictionary, new_props_id:String):
