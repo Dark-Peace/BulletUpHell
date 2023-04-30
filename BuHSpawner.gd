@@ -656,6 +656,12 @@ func change_animation(b:Dictionary, type:String, B):
 		b["anim_frame"] = 0
 		b["anim_loop"] = textures.get_animation_loop(anim_id)
 		b["anim_speed"] = textures.get_animation_speed(anim_id)
+	elif b.has("anim_frame"):
+		b.erase("anim_length")
+		b.erase("anim_counter")
+		b.erase("anim_frame")
+		b.erase("anim_loop")
+		b.erase("anim_speed")
 	
 	var col_id = b["props"].get("anim_"+type+"_collision","")
 	if col_id != "" and col_id != b["colID"]:
@@ -743,10 +749,10 @@ func get_RID_from_index(source_area:RID, index:int) -> RID:
 	return Phys.area_get_shape(source_area, index)
 
 func change_property(type:String, id:String, prop:String, new_value):
+	var res = call_deferred(type, id)
 	match type:
-		"pattern","container","trigger":
-			call(type, id).set(prop, new_value)
-		"bullet": bullet(id)[prop] = new_value
+		"pattern","container","trigger": res.set(prop, new_value)
+		"bullet": res[prop] = new_value
 
 func switch_property_of_bullet(b:Dictionary, new_props_id:String):
 	b["props"] = bullet(new_props_id)
