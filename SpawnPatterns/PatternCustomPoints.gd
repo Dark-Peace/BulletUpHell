@@ -21,6 +21,7 @@ var pattern_angle:float = 0
 var iterations:int = 1
 var forced_angle:float = 0.0
 var forced_target:NodePath
+var forced_lookat_mouse:bool = false
 var forced_pattern_lookat:bool = true
 var follows_parent:bool = false
 
@@ -146,27 +147,14 @@ func _get_property_list() -> Array:
 			type = TYPE_NODE_PATH,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
+			name = "forced_lookat_mouse",
+			type = TYPE_BOOL,
+			usage = PROPERTY_USAGE_DEFAULT
+		},{
 			name = "forced_pattern_lookat",
 			type = TYPE_BOOL,
 			usage = PROPERTY_USAGE_DEFAULT
-		},
-#		{
-#			name = "Non Bullet Spawn",
-#			type = TYPE_NIL,
-#			hint_string = "other_",
-#			usage = PROPERTY_USAGE_GROUP
-#		},{
-#			name = "other_scene",
-#			type = TYPE_STRING,
-#			hint = PROPERTY_HINT_FILE,
-#			hint_string = "*.tscn",
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},{
-#			name = "other_props",
-#			type = TYPE_DICTIONARY,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},
-		{
+		},{
 			name = "Cooldowns",
 			type = TYPE_NIL,
 			hint_string = "cooldown",
