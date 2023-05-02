@@ -237,8 +237,11 @@ func back_to_grave(bullet:String, bID):
 
 func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionary):
 	if pattern.forced_target != NodePath():
-		if pattern.forced_pattern_lookat: queued_instance["rotation"] = pos.angle_to(pattern.node_target.global_position)
-		else: queued_instance["rotation"] = (pattern.node_target.global_position-queued_instance["global_position"]).angle()
+		if pattern.forced_pattern_lookat: queued_instance["rotation"] = pos.angle_to_point(pattern.node_target.global_position)
+		else: queued_instance["rotation"] = (pattern.node_target.global_position-queued_instance["spawn_pos"]).angle()
+	elif pattern.forced_lookat_mouse:
+		if pattern.forced_pattern_lookat: queued_instance["rotation"] = pos.angle_to_point(get_global_mouse_position())
+		else: queued_instance["rotation"] = (pos+queued_instance["spawn_pos"]).angle_to_point(get_global_mouse_position())
 	elif pattern.forced_angle != 0.0:
 		queued_instance["rotation"] = pattern.forced_angle
 
