@@ -45,6 +45,8 @@ var spec_rotating_speed = 0.0
 var spec_trail_length:float = 0.0
 var spec_trail_width:float = 0.0
 var spec_trail_modulate:Color = Color.WHITE
+#var spec_angle_no_colliding:float = 0.0
+#var spec_angle_no_coll_offset:float = 0.0
 
 ## triggers
 var trigger_container:String
@@ -53,7 +55,7 @@ var trigger_wait_for_shot = true
 ## homing
 enum GROUP_SELECT{Nearest_on_homing,Nearest_on_spawn,Nearest_on_shoot,Nearest_anywhen,Random}
 enum LIST_BEHAVIOUR{Stop, Loop, Reverse}
-enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, ListPositions, ListNodes}
+enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, ListPositions, ListNodes, MouseCursor}
 var homing_type:int = TARGET_TYPE.Nodepath : set = set_homing_type
 var homing_target:NodePath = NodePath()
 var homing_special_target:String
@@ -69,11 +71,7 @@ var homing_position:Vector2
 var homing_steer = 0
 var homing_time_start = 0
 var homing_duration = 999
-
-## laser beams
-#var beam_length_per_ray:float = 0
-#var beam_width:float = 0
-#var beam_bounce_amount:int = 0
+var homing_mouse:bool
 
 ## advanced scale
 var scale_multi_iterations = 0
@@ -257,6 +255,14 @@ func _get_property_list() -> Array:
 			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
 		},{
+			name = "spec_angle_no_colliding",
+			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT
+		},{
+			name = "spec_angle_no_coll_offset",
+			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT
+		},{
 			name = "Destruction",
 			type = TYPE_NIL,
 			hint_string = "death_",
@@ -380,11 +386,12 @@ func _get_property_list() -> Array:
 			hint_string = LIST_BEHAVIOUR,
 			usage = PROPERTY_USAGE_DEFAULT
 		}]
-
-	PL_homing = [PL_homing[homing_type]]
-	if homing_type in [TARGET_TYPE.Group, TARGET_TYPE.Surface]: PL_homing += PL_homing_group
+	
+	if homing_type != 7: PL_homing = [PL_homing[homing_type]]
+	else: PL_homing = []
+	if homing_type in [TARGET_TYPE.Group, TARGET_TYPE.Surface, TARGET_TYPE.MouseCursor]: PL_homing += PL_homing_group
 	elif homing_type in [TARGET_TYPE.ListNodes,TARGET_TYPE.ListPositions]: PL_homing += PL_homing_list
-
+	
 	var PL2 = [{
 			name = "homing_steer",
 			type = TYPE_FLOAT,
@@ -397,26 +404,7 @@ func _get_property_list() -> Array:
 			name = "homing_duration",
 			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
-		},
-#		{
-#			name = "Laser Beam",
-#			type = TYPE_NIL,
-#			hint_string = "beam_",
-#			usage = PROPERTY_USAGE_GROUP
-#		},{
-#			name = "beam_length_per_ray",
-#			type = TYPE_FLOAT,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},{
-#			name = "beam_width",
-#			type = TYPE_FLOAT,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},{
-#			name = "beam_bounce_amount",
-#			type = TYPE_INT,
-#			usage = PROPERTY_USAGE_DEFAULT
-#		},
-		{
+		},{
 			name = "Advanced Scale",
 			type = TYPE_NIL,
 			hint_string = "scale_",

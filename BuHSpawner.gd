@@ -499,6 +499,7 @@ func _spawn(bullets:Array):
 			init_special_variables(B,b)
 			if B["props"].get("homing_select_in_group",-1) == GROUP_SELECT.Nearest_on_spawn:
 				target_from_options(B)
+#				print(B)
 		else: poolBullets.erase(b)
 
 func _spawn_object(b:Node2D, B:Dictionary):
@@ -534,12 +535,13 @@ func _shoot(bullets:Array):
 		if B["props"].has("homing_target") or B["props"].has("node_homing"):
 			if B["props"].get("homing_time_start",0) > 0:
 				get_tree().create_timer(B["props"]["homing_time_start"]).connect("timeout",Callable(self,"_on_Homing_timeout").bind(B,true))
-			else: _on_Homing_timeout(B,true)
+			else: _on_Homing_timeout(B, true)
 		if B["props"].get("homing_select_in_group",-1) == GROUP_SELECT.Nearest_on_shoot:
 			target_from_options(B)
 		
 		if not change_animation(B,"shoot",b): B["state"] = BState.Shooting
 		if B["props"].has("anim_shoot_sfx"): $SFX.get_child(B["props"]["anim_shoot_sfx"]).play()
+		
 
 func init_special_variables(b:Dictionary, rid):
 	var bp = b["props"]
@@ -922,12 +924,13 @@ func bullet_movement(delta:float):
 			#direction from math equation
 			if props.get("a_direction_equation","") != "":
 				if expression.parse(props["a_direction_equation"],["x"]) != OK:
-					print(expression.get_error_text())
+					push_error(expression.get_error_text())
 					return
 				B["curveDir_index"] += 0.05 #TODO add speed
 				B["curve"] = expression.execute([B["curveDir_index"]])*100
 			
 			#homing
+#			print(B.get("homing_target", null))
 			if B.get("homing_target", null):
 				var target_angle:float
 				var target_pos:Vector2
@@ -1019,8 +1022,9 @@ func bullet_movement(delta:float):
 func _on_Homing_timeout(B:Dictionary, start:bool):
 	if start:
 		var props = B["props"]
-		if props.has("homing_target") or props.has("node_homing"): B["homing_target"] = props["node_homing"]
-		else: B["homing_target"] = props["homing_position"]
+		if not props.has("homing_mouse"):
+			if props.has("homing_target") or props.has("node_homing"): B["homing_target"] = props["node_homing"]
+			else: B["homing_target"] = props["homing_position"]
 		if props["homing_duration"] > 0:
 			get_tree().create_timer(props["homing_duration"]).connect("timeout",Callable(self,"_on_Homing_timeout").bind(B,false))
 		if props.get("homing_select_in_group",-1) == GROUP_SELECT.Nearest_on_homing:
@@ -1034,6 +1038,7 @@ func _on_Homing_timeout(B:Dictionary, start:bool):
 func target_from_options(B:Dictionary, random:bool=false):
 	if B["props"].has("homing_group"): target_from_group(B, random)
 	elif B["props"].has("homing_surface"): target_from_segments(B, random)
+	elif B["props"].has("homing_mouse"): B["homing_target"] = get_global_mouse_position()
 
 func target_from_group(B:Dictionary, random:bool=false):
 	var all_nodes = get_tree().get_nodes_in_group(B["props"]["homing_group"])
