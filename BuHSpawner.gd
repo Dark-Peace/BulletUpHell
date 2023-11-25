@@ -6,6 +6,8 @@ signal bullet_collided_body(body:Node,body_shape_index:int, bullet:Dictionary, l
 
 const STANDARD_BULLET_RADIUS = 5
 
+var CUSTOM:customFunctions = customFunctions.new()
+
 @export var GROUP_BOUNCE:String = "Slime"
 
 @export_group("Resource Lists")
@@ -35,6 +37,7 @@ var arrayInstances:Dictionary = {}
 
 var poolBullets:Dictionary = {}
 var shape_indexes:Dictionary = {}
+var shape_rids:Dictionary = {}
 var Phys = PhysicsServer2D
 enum BState{Unactive,Spawning,Spawned,Shooting,Moving,QueuedFree}
 const UNACTIVE_ZONE = Vector2(99999,99999)
@@ -99,6 +102,7 @@ func reset(minimal:bool=false):
 	global_reset_counter += 1
 	inactive_pool.clear()
 	shape_indexes.clear()
+	shape_rids.clear()
 	poolBullets.clear()
 	poolQueue.clear()
 	poolTimes.clear()
@@ -130,7 +134,7 @@ func _process(delta: float) -> void:
 	_delta = delta
 	if not cull_fixed_screen:
 		viewrect = Rect2(-get_canvas_transform().get_origin()/get_canvas_transform().get_scale(), \
-							get_viewport_rect().size/get_canvas_transform().get_scale())
+						get_viewport_rect().size/get_canvas_transform().get_scale())
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint(): return
@@ -223,10 +227,11 @@ func create_pool(bullet:String, shared_area:String, amount:int, object:bool=fals
 		var shared_rid:RID = get_shared_area_rid(shared_area)
 		var count:int = Phys.area_get_shape_count(shared_rid)
 		var new_rid:RID
-		$SharedAreas.get_node(shared_area).set_meta("ShapeCount", $SharedAreas.get_node(shared_area).get_meta("ShapeCount", 0)+amount) # Warning, bad sync possible ?
+		$SharedAreas.get_node(shared_area).set_meta("ShapeCount", $SharedAreas.get_node(shared_area).get_meta("ShapeCount",0)+amount) # Warning, bad sync possible ?
 		for i in amount:
 			new_rid = create_shape(shared_rid, colID, true, count+i)
-			shape_indexes[new_rid] = count+i
+#			shape_indexes[new_rid] = count+i
+			_update_shape_indexes(new_rid, count+i, shared_area)
 			inactive_pool[bullet].append([new_rid, shared_area])
 	inactive_pool["__SIZE__"+bullet] += amount
 
@@ -456,18 +461,8 @@ func create_shape(shared_rid:RID, ColID:String, init:bool=false, count:int=0) ->
 		Transform2D(arrayShapes[ColID][2],arrayShapes[ColID][1]+(UNACTIVE_ZONE*int(init))))
 	if count == 0: count = Phys.area_get_shape_count(shared_rid)
 	Phys.area_set_shape_disabled(shared_rid, count-1, true)
-	
-	if not shape_indexes.has(shared_rid): shape_indexes[shared_rid] = {}
-	shape_indexes[shared_rid][count-1] = new_shape
 	return new_shape
 
-	# bullet base structure
-#	{
-#		"pID": 0,
-#		"position": Vector2(),
-#		"rotation": 0,
-#		"state": BState.Unactive,
-#	}
 
 func plan_spawn(bullets:Array, spawn_delay:float=0):
 	var timestamp = getKeyTime(spawn_delay)
@@ -507,7 +502,7 @@ func _spawn(bullets:Array):
 		if not poolBullets.has(b):
 			push_error("Warning: Bullet of ID "+str(b)+" is missing.")
 			continue
-		#assert(poolBullets.has(b))
+		
 		B = poolBullets[b]
 		if B["state"] >= BState.Moving: continue
 		if B["source_node"] is Dictionary: B["position"] = B["spawn_pos"] + B["source_node"]["position"]
@@ -698,8 +693,8 @@ func change_animation(b:Dictionary, type:String, B):
 		b["colID"] = col_id
 		var new_rid:RID = create_shape(b["shared_area"].get_rid(), b["colID"])
 		poolBullets[new_rid] = b
-		shape_indexes[new_rid] = Phys.area_get_shape_count(b["shared_area"].get_rid())-1
-#		b["_INDEX_"] = Phys.area_get_shape_count(b["shared_area"].get_rid())-1
+#		shape_indexes[new_rid] = Phys.area_get_shape_count(b["shared_area"].get_rid())-1
+		_update_shape_indexes(new_rid, Phys.area_get_shape_count(b["shared_area"].get_rid())-1, b["shared_area"].name)
 		back_to_grave(B["props"]["__ID__"], B)
 	
 	return instantly
@@ -773,10 +768,6 @@ func rid_to_bullet(rid):
 	return poolBullets[rid]
 
 func get_RID_from_index(source_area:RID, index:int) -> RID:
-#	var count:int = Phys.area_get_shape_count(source_area)
-#	if index >= count:
-#		push_error("Source Area doesn't have a shape of index "+str(index)+", it has only "+str(count)+" shapes.")
-#		index = count-1
 	return Phys.area_get_shape(source_area, index)
 
 func change_property(type:String, id:String, prop:String, new_value):
@@ -1045,8 +1036,6 @@ func bullet_movement(delta:float):
 		
 		check_bullet_culling(B,b)
 		
-#		if b is RID: continue
-#		elif b.base_scale == null: b.base_scale = b.scale
 		if not b is RID:
 			if b.base_scale == null: b.base_scale = b.scale
 			# move object scene
@@ -1054,7 +1043,7 @@ func bullet_movement(delta:float):
 			b.rotation = B["rotation"] + B.get("rot_index",0)
 			b.scale = b.base_scale * B.get("scale", Vector2(props["scale"], props["scale"]))
 			continue
-		## apply movement ##
+			
 		_apply_movement(B, b, props)
 		
 
@@ -1082,36 +1071,6 @@ func _apply_movement(B:Dictionary, b:RID, props:Dictionary):
 			Phys.area_set_shape_disabled(shared_rid, shape_indexes[b], false)
 		B["shape_disabled"] = false
 
-#func _apply_movement2():
-#	var shared_rid:RID; var Brid:RID; var B:Dictionary; var props:Dictionary
-#	for area in $SharedAreas.get_children():
-#		shared_rid = area.get_rid()
-##		print(area.get_meta("ShapeCount"), shape_indexes[shared_rid].size())
-#		for b in area.get_meta("ShapeCount"):
-#			Brid = get_RID_from_index(shared_rid,b) # TODO change that for optimisation
-##			print(shape_indexes[shared_rid].has(b), b)
-##		for b in shape_indexes[shared_rid].keys():
-##			Brid = shape_indexes[shared_rid][b]
-#			B = poolBullets.get(Brid, {})
-#			if B.is_empty() or B["state"] == BState.Unactive or check_move_culling(B): continue
-#			props = B["props"]
-#
-#			# erase destroyed bullets
-#			if B["state"] == BState.QueuedFree:
-#				Phys.area_set_shape_disabled(shared_rid, b, true)
-#				poolBullets.erase(Brid)
-#				continue
-#
-#			# move active bullets
-#			if not props.get("spec_no_collision", false):
-#				Phys.area_set_shape_transform(shared_rid, b, Transform2D(B["rotation"]+B.get("rot_index",0), B.get("scale",Vector2(props["scale"],props["scale"])), props.get("skew",0), B["position"]))
-#
-#			# active collision for new bullets
-#			if B["shape_disabled"]:
-#				if not props.get("spec_no_collision", false): Phys.area_set_shape_disabled(shared_rid, b, false)
-#				B["shape_disabled"] = false
-
-
 func _calculate_bullets_index(from_index:int=-1):
 	var shared_rid:RID; var Brid:RID; var B:Dictionary;
 	if from_index == -1:
@@ -1119,13 +1078,17 @@ func _calculate_bullets_index(from_index:int=-1):
 			shared_rid = area.get_rid()
 			for b_index in area.get_meta("ShapeCount"):
 				Brid = get_RID_from_index(shared_rid,b_index)
-				shape_indexes[Brid] = b_index
-	#			B = poolBullets.get(Brid, {})
-	#			B["_index_"] = b
+				_update_shape_indexes(Brid, b_index, B["shared_area"].name)
+				#shape_indexes[Brid] = b_index
 #	else: # TODO : add optimisation
 #		for index in shape_indexes.values():
 #			if 
 
+func _update_shape_indexes(rid, index:int, area:String):
+	shape_indexes[rid] = index
+	if not shape_rids.has(area):
+		shape_rids[area] = {}
+	shape_rids[area][index] = rid
 
 func _on_Homing_timeout(B:Dictionary, start:bool):
 	if start:
@@ -1186,24 +1149,25 @@ func trig_timeout(b, rid):
 
 
 func bullet_collide_area(area_rid:RID,area:Area2D,area_shape_index:int,local_shape_index:int,shared_area:Area2D) -> void:
-	print("bullet detects area")
-	## uncomment if you use something from below
-#	var rid = get_RID_from_index(shared_area.get_rid(), local_shape_index)
+	############## uncomment if you want to use the standard behavior below ##############
+#	var rid = shape_rids.get(shared_area.name, {}).get(local_shape_index)
 	
-	## emit signal
+	############## emit signal
 #	if not poolBullets.has(rid): return
 #	var B = poolBullets[rid]
 #	bullet_collided_area.emit(area,area_shape_index,B,local_shape_index,shared_area)
 	
-	## uncomment to manage trigger collisions with area collisions
+	############## uncomment to manage trigger collisions with area collisions
 #	if B["trig_types"].has("TrigCol"):
 #		B["trig_collider"] = area
 #		B["trig_container"].checkTriggers(B, rid)
+	
+	############## uncomment if you want to implement custom behavior
+#	CUSTOM.bullet_collide_area(area_rid, area, area_shape_index, local_shape_index, shared_area, B, rid)
 	pass
 
 func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape_index:int,shared_area:Area2D) -> void:
-#	print("bullet detects body")
-	var rid = get_RID_from_index(shared_area.get_rid(), local_shape_index)
+	var rid = shape_rids.get(shared_area.name, {}).get(local_shape_index)
 	if not poolBullets.has(rid):
 		rid = shared_area
 		if not poolBullets.has(rid): return
@@ -1211,7 +1175,9 @@ func bullet_collide_body(body_rid:RID,body:Node,body_shape_index:int,local_shape
 	
 #	if B["props"].has("spec_angle_no_collision"):
 #		var angle:float = B["position"].angle_to_point(body.global_position)
-#
+	
+	############## uncomment if you want to implement custom behavior
+#	CUSTOM.bullet_collide_body(body_rid, body, body_shape_index, local_shape_index, shared_area, B, rid)
 	
 	bullet_collided_body.emit(body, body_shape_index, B, local_shape_index, shared_area)
 	
