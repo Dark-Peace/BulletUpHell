@@ -1,9 +1,9 @@
 [gd_scene load_steps=10 format=3 uid="uid://gixop20d1d75"]
 
 [ext_resource type="Script" path="res://addons/BulletUpHell/BuHSpawner.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://ctmnf87a0uhnm" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_3.png" id="2_3slxn"]
-[ext_resource type="Texture2D" uid="uid://c7mn6eexkya75" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_06.png" id="3_6fafs"]
-[ext_resource type="Texture2D" uid="uid://cuos8ah3iew3d" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_11.png" id="4_gntuv"]
+[ext_resource type="Texture2D" uid="uid://cn0mfdmnmkare" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_3.png" id="2_3slxn"]
+[ext_resource type="Texture2D" uid="uid://b2ku62tpreqh2" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_06.png" id="3_6fafs"]
+[ext_resource type="Texture2D" uid="uid://glq0o8fck6f5" path="res://addons/BulletUpHell/BulletScene/Sprites/Bullet_11.png" id="4_gntuv"]
 [ext_resource type="AudioStream" uid="uid://c6x5p1wu4yo3q" path="res://addons/BulletUpHell/BulletScene/Hit Hurt.wav" id="5_rada6"]
 
 [sub_resource type="Curve" id="4"]

@@ -103,18 +103,26 @@ func _ready():
 		$SFX.call_deferred("add_child",instance)
 
 func reset(minimal:bool=false):
+	# change that in order signal that a reset has been made and stop the currently running func
 	global_reset_counter += 1
+	# reset bullets
+	reset_bullets()
+	# empty data structure
 	inactive_pool.clear()
-	shape_indexes.clear()
+	#shape_indexes.clear()
 	shape_rids.clear()
-	poolBullets.clear()
+	#poolBullets.clear()
 	poolQueue.clear()
 	poolTimes.clear()
+	# reset time count
 	time = 0
 	_delta = 0
-	for a in $SharedAreas.get_children(): a.set_meta("ShapeCount", 0)
+	# reset active bullet states
+	for a in $SharedAreas.get_children():
+		a.set_meta("ShapeCount", 0)
+	# reset bounce calculation
 	$Bouncy.global_position = UNACTIVE_ZONE
-	
+	# remove unneeded resources
 	if not minimal:
 		arrayContainers.clear()
 		arrayInstances.clear()
@@ -375,6 +383,7 @@ func _thread_spawn(spawner, id:String, shared_area:String="0"):
 	var pos:Vector2; var ori_angle:float;
 	var bullet_props:Dictionary; var queued_instance:Dictionary; var bID; var is_object:bool; var is_bullet_node:bool
 	while iter != 0:
+		if spawner == null: return
 		for l in pattern.layer_nbr:
 			if spawner is Node2D:
 				ori_angle = spawner.rotation
