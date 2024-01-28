@@ -383,8 +383,8 @@ func _thread_spawn(spawner, id:String, shared_area:String="0"):
 	var pos:Vector2; var ori_angle:float;
 	var bullet_props:Dictionary; var queued_instance:Dictionary; var bID; var is_object:bool; var is_bullet_node:bool
 	while iter != 0:
-		if spawner == null: return
 		for l in pattern.layer_nbr:
+			if spawner == null: return
 			if spawner is Node2D:
 				ori_angle = spawner.rotation
 				pos = spawner.global_position
