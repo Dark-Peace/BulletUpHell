@@ -163,8 +163,8 @@ func spawn(target, id:String, shared_area="0"):
 	var pos:Vector2; var ori_angle:float;
 	var bullet_props; var angle; var queued_instance; var bID;
 	while iter != 0:
-		if target == null: return
 		for l in pattern.layer_nbr:
+			if target == null: return
 			if target is Node2D:
 				ori_angle = target.rotation
 				pos = target.global_position
