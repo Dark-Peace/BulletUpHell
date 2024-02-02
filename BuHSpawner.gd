@@ -328,7 +328,7 @@ func create_shape(shared_rid:RID, ColID:String, init:bool=false, count:int=0) ->
 ### INIT BULLETS DATA ###
 
 func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionary):
-	if pattern.forced_target != NodePath():
+	if pattern.forced_target != NodePath() and pattern.node_target != null:
 		if pattern.forced_pattern_lookat: queued_instance["rotation"] = pos.angle_to_point(pattern.node_target.global_position)
 		else: queued_instance["rotation"] = (pattern.node_target.global_position-queued_instance["spawn_pos"]).angle()
 	elif pattern.forced_lookat_mouse:
