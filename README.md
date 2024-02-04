@@ -32,7 +32,7 @@ I also provide you with a full documentation on how to use everything. See next 
 
 ## Installation
 
-Download the latest release from the Release section. For the rest of the installation and the documentation of all my plugins, check this : [BottledPluginsDocumentation](https://www.notion.so/dark-peace/Godot-Engine-Plugins-addons-by-Dark-Peace-c7887a7272da4b2cb83f57523ff0ce9d)
+Download the latest release from the Release section. For the rest of the installation and the documentation of all my plugins, check this : [https://rebrand.ly/Dark-Peace-Godot-Plugins](https://rebrand.ly/Dark-Peace-Godot-Plugins)
 
 I'll also post complete tutorials on my Youtube channel when I'll have the time so consider subscribing to not miss any news !
 https://www.youtube.com/@Dark_Peace
