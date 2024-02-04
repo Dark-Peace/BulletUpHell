@@ -17,6 +17,7 @@ As a BulletHell dev myself, my aim is to create a plugin able to recreate ALL th
 The plugin has 4 custom nodes and a bunch of resources you can use to create all the complex attack patterns without coding (but some things are just much more easier to do by code, I didn't make it with the goal that someone who doesn't know how to code could use it). Just drag and drop them in your scene, fill up the properties you want and watch as the magic happens.
 
 Video tutorial to get started : [tuto](https://youtu.be/YG4KW3iu1YA)
+
 I also provide you with a full documentation on how to use everything. See next paragraph.
 
 
