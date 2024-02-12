@@ -686,6 +686,7 @@ func move_homing(B:Dictionary, props, delta:float):
 	
 	var target_pos:Vector2
 	if typeof(B["homing_target"]) == TYPE_OBJECT:
+		if not is_instance_valid(B["homing_target"]): return
 		target_pos = B["homing_target"].global_position
 	else: target_pos = B["homing_target"]
 	
