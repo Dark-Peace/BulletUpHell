@@ -5,6 +5,7 @@ class_name BulletNodeProps
 
 @export var instance_id:String
 
+var damage:float = 1
 var speed:float = 100
 var scale = 1
 var angle = 0
@@ -47,7 +48,7 @@ var trigger_wait_for_shot = true
 ## homing
 enum GROUP_SELECT{Nearest_on_homing,Nearest_on_spawn,Nearest_on_shoot,Nearest_anywhen,Random}
 enum LIST_BEHAVIOUR{Stop, Loop, Reverse}
-enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, ListPositions, ListNodes}
+enum TARGET_TYPE{Nodepath, Position, SpecialNode, Group, Surface, ListPositions, ListNodes, MouseCursor}
 var homing_type:int = TARGET_TYPE.Nodepath : set = set_homing_type
 var homing_target:NodePath = NodePath()
 var homing_special_target:String
