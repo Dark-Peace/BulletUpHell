@@ -3,6 +3,7 @@
 extends PackedDataContainer
 class_name BulletProps
 
+var damage:float = 1
 var speed:float = 100
 var scale = 1
 var angle = 0
@@ -139,6 +140,10 @@ func set_homing_type(value):
 
 func _get_property_list() -> Array:
 	var PL1 = [{
+			name = "damage",
+			type = TYPE_FLOAT,
+			usage = PROPERTY_USAGE_DEFAULT
+		},{
 			name = "speed",
 			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
