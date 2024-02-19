@@ -789,14 +789,15 @@ func bullet_movement(delta:float):
 			b.rotation = B["rotation"] + B.get("rot_index",0)
 			b.scale = b.base_scale * B.get("scale", Vector2(props["scale"], props["scale"]))
 			continue
-			
-		_apply_movement(B, b, props)
+		else:
+			_apply_movement(B, b, props)
 
 func _apply_movement(B:Dictionary, b:RID, props:Dictionary):
 	if B.get("state", BState.Unactive) == BState.Unactive or B.is_empty() or check_move_culling(B): return
 	
 	var shared_rid:RID = B["shared_area"].get_rid()
-	var bullet_index:int = shape_indexes[b]
+	var bullet_index:int = shape_indexes.get(b, -1)
+	if bullet_index == -1: return
 	# erase destroyed bullets
 	if B["state"] == BState.QueuedFree:
 		Phys.area_set_shape_disabled(shared_rid, bullet_index, true)
