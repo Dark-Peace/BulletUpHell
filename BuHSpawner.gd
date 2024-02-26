@@ -671,6 +671,7 @@ func move_speed(B:Dictionary, props, delta:float):
 	B["speed"] = props["a_speed_multiplier"].sample(B["speed_interpolate"]/props["a_speed_multi_scale"])
 	if B["speed_interpolate"]/props["a_speed_multi_scale"] >= 1 and props["a_speed_multi_iterations"] != -1:
 		B["speed_multi_iter"] -= 1
+		B["speed_interpolate"] = 0
 
 func move_equation(B:Dictionary, props):
 	if props.get("a_direction_equation","") == "": return
