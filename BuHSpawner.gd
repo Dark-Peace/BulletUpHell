@@ -529,7 +529,8 @@ func unactive_spawn(bullets:Array):
 		B = poolBullets[b]
 		if B["state"] >= BState.Moving: continue
 		if B["source_node"] is RID: B["position"] = B["spawn_pos"] + poolBullets[B["source_node"]]["position"]
-		else: B["position"] = B["spawn_pos"] + B["source_node"].global_position
+		elif B["source_node"] is Dictionary: B["position"] = B["spawn_pos"] + B["source_node"]["position"]
+		else: B["position"] = B["spawn_pos"] + B["source_node"].global_position # warning: no idea what this case is
 
 func _spawn(bullets:Array):
 	var B:Dictionary
