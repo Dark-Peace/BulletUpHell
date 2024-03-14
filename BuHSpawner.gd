@@ -801,7 +801,7 @@ func _on_Homing_timeout(B:Dictionary, start:bool):
 		B["homing_target"] = Vector2()
 
 func target_from_options(B:Dictionary, random:bool=false):
-	if B.has("homing_group"): target_from_group(B, random)
+	if B["props"].has("homing_group"): target_from_group(B, random)
 	elif B.has("homing_surface"): target_from_segments(B, random)
 
 func target_from_group(B:Dictionary, random:bool=false):
