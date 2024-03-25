@@ -1,4 +1,4 @@
-# BulletupHell
+# Dark Peace's BulletUpHell
  
 ## Presentation
 
@@ -34,10 +34,10 @@ You want even more than the best Bullethell engine ? Then go for the improved ve
 ## Q&A
 
 - Q: Will there be new features in the future ?
-- A: Yes. But the V4.3 is the final free version. The next update will be part of the premium BLAST version.
+A: Yes. But the V4.3 is the final free version. The next update will be part of the premium BLAST version.
 
 - Q: Are the versions compatible ?
-- A: If you're satisfied with the features of your old version, there is no reason to update. I try to make my versions as compatible as possible but always back up your project before updating.
+A: If you're satisfied with the features of your old version, there is no reason to update. I try to make my versions as compatible as possible but always back up your project before updating.
 
 - Q: Can I make updates to the plugin ?
-- A: Sure, but please tell me about it. Also any feature idea is welcomed.
+A: Sure, but please tell me about it. Also any feature idea is welcomed.
