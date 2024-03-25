@@ -31,6 +31,9 @@ The plugin has custom nodes and a bunch of resources you can use to create all t
 
 You want even more than the best Bullethell engine ? Then go for the improved version : [BulletUpHell BLAST]. More features, more updates, improved API, improved optimisation,...
 
+![image](https://github.com/Dark-Peace/BulletUpHell/assets/74102789/162630fe-14c0-49dc-9f39-93539b24da8c)
+
+
 ## Q&A
 
 - Q: Will there be new features in the future ?
