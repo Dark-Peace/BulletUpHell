@@ -8,7 +8,7 @@ As a BulletHell dev myself, my aim is to create a plugin able to recreate ALL th
 
 You want even more than the best Bullethell engine ? Then go for the improved version : [BulletUpHell BLAST]. More features, more updates, improved API, improved optimisation,...
 
-Tutorial, installation steps and documentation below the screenshots.
+Tutorial, installation steps and documentation below the screenshots. (lags on the gif comes from the recorder, not the plugin XD)
 
 ![Godot_v4 0-stable_win64_kKgJZaEScg](https://user-images.githubusercontent.com/74102789/232424299-f37086cc-1e79-421f-a0b8-91a93c53f74e.gif)
 ![Godot_v4 0-stable_win64_9tcJjfETCc](https://user-images.githubusercontent.com/74102789/232424341-ead8e0e5-31b0-46b1-a679-71896bbf4e42.gif)
