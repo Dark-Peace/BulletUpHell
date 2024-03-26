@@ -39,12 +39,12 @@ var wait_tween_momentum:MOMENTUM = MOMENTUM.None
 var wait_tween_length:float = 0
 var wait_tween_time:float = 0
 
-var layer_nbr:int = 1
-var layer_cooldown_spawn:float = 0
-#export (float) var cooldownshoot = 0
-var layer_pos_offset:float = 0
-var layer_speed_offset:float = 0
-var layer_angle_offset:float = 0
+#var layer_nbr:int = 1
+#var layer_cooldown_spawn:float = 0
+##export (float) var cooldownshoot = 0
+#var layer_pos_offset:float = 0
+#var layer_speed_offset:float = 0
+#var layer_angle_offset:float = 0
 
 
 var r_randomisation_chances:float=1
@@ -196,36 +196,38 @@ func _get_property_list() -> Array:
 			name = "wait_tween_time",
 			type = TYPE_FLOAT,
 			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "Layers",
-			type = TYPE_NIL,
-			hint_string = "layer_",
-			usage = PROPERTY_USAGE_GROUP
-		},{
-			name = "layer_nbr",
-			type = TYPE_INT,
-			hint = PROPERTY_HINT_RANGE,
-			hint_string = "0, 999999",
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "layer_cooldown_spawn",
-			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "layer_pos_offset",
-			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "layer_speed_offset",
-			type = TYPE_FLOAT,
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
-			name = "layer_angle_offset",
-			type = TYPE_FLOAT,
-			hint = PROPERTY_HINT_RANGE,
-			hint_string = "-3.1416, 3.1416",
-			usage = PROPERTY_USAGE_DEFAULT
-		},{
+		},
+		#{
+			#name = "Layers",
+			#type = TYPE_NIL,
+			#hint_string = "layer_",
+			#usage = PROPERTY_USAGE_GROUP
+		#},{
+			#name = "layer_nbr",
+			#type = TYPE_INT,
+			#hint = PROPERTY_HINT_RANGE,
+			#hint_string = "0, 999999",
+			#usage = PROPERTY_USAGE_DEFAULT
+		#},{
+			#name = "layer_cooldown_spawn",
+			#type = TYPE_FLOAT,
+			#usage = PROPERTY_USAGE_DEFAULT
+		#},{
+			#name = "layer_pos_offset",
+			#type = TYPE_FLOAT,
+			#usage = PROPERTY_USAGE_DEFAULT
+		#},{
+			#name = "layer_speed_offset",
+			#type = TYPE_FLOAT,
+			#usage = PROPERTY_USAGE_DEFAULT
+		#},{
+			#name = "layer_angle_offset",
+			#type = TYPE_FLOAT,
+			#hint = PROPERTY_HINT_RANGE,
+			#hint_string = "-3.1416, 3.1416",
+			#usage = PROPERTY_USAGE_DEFAULT
+		#},
+		{
 			name = "Random",
 			type = TYPE_NIL,
 			hint_string = "r_",
