@@ -4,6 +4,10 @@ extends Path2D
 @export var id:String = ""
 @export var props:PackedDataContainer
 
+const ATEXTURE:int = 0
+const ACOLLISION:int = 1
+const ASFX:int = 2
+
 
 func _ready():
 	randomize()
@@ -30,6 +34,7 @@ func _ready():
 			props.curve = curve
 	
 	var dict:Dictionary = {}; var P; var has_random:bool=false;
+	var anim_state_name:String
 	var allow_random:bool = (props is ObjectProps or randf_range(0,1) <= props.get("r_randomisation_chances"));
 	for p in props.get_property_list():
 		P = p["name"]
@@ -68,6 +73,19 @@ func _ready():
 		elif P in ["homing_when_list_ends"] and not dict.has("homing_list"): continue
 		elif P in ["spec_trail_modulate","spec_trail_width"] and not dict.has("spec_trail_length"): continue
 		
+		#elif P.left(5) == "anim_":
+			#for a in props.get(P):
+				#anim_state_name = "anim_"+a.ID
+				#dict[anim_state_name] = [a.texture, Spawning.arrayShapes[a.collision],$SFX.get_node(a.SFX)]
+				##if dict[anim_state_name][ATEXTURE] == "": dict[anim_state_name][ATEXTURE] = default_anim.texture
+				##if dict[anim_state_name][ACOLLISION] == "": dict[anim_state_name][ACOLLISION] = default_anim.collision
+				##if dict[anim_state_name][ASFX] == "": dict[anim_state_name][ASFX] = default_anim.SFX
+			#if not dict.has("anim_idle"):
+				#dict["anim_idle"] = [default_anim.texture, arrayShapes[default_anim.collision], $SFX.get_node(default_anim.SFX)]
+			#if dict.has("anim_spawn"): dict["first_collision"] = dict["anim_spawn"][ACOLLISION]
+			#else: dict["first_collision"] = dict["anim_idle"][ACOLLISION]
+			#continue
+		
 		elif P.left(2) == "r_":
 			if not allow_random or \
 			(p["type"] == TYPE_STRING and props.get(P) == "") or \
@@ -75,11 +93,13 @@ func _ready():
 			(p["type"] == TYPE_FLOAT and props.get(P) == 0.0) or \
 			(p["type"] == TYPE_ARRAY and props.get(P).is_empty()): continue
 			
-			if p["type"] == TYPE_STRING: props.set(P, Array(props.get(P).split(";",false)))
-			
 			if not has_random:
 				has_random = true
 				dict["has_random"] = true
+			
+			if p["type"] == TYPE_STRING:
+				dict[P] = Array(props.get(P).split(";",false))
+				continue
 		
 		elif P == "instance_id":
 			assert(props.get(P) != "", "Instance_ID field can't be empty in node "+name)
@@ -90,5 +110,4 @@ func _ready():
 		dict[P] = props.get(P)
 	dict["__ID__"] = id
 	Spawning.new_bullet(id, dict)
-	print(dict)
 	queue_free()

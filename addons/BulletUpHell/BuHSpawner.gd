@@ -31,7 +31,7 @@ var arrayPatterns:Dictionary = {}
 var arrayContainers:Dictionary = {}
 var arrayInstances:Dictionary = {}
 @onready var textures = $ShapeManager.sprite_frames
-@onready var arrayShapes = {} # format: id={shape, offset, rotation}
+@onready var arrayShapes:Dictionary = {} # format: id={shape, offset, rotation}
 @onready var viewrect = get_viewport().get_visible_rect()
 
 
@@ -337,31 +337,31 @@ func set_angle(pattern:NavigationPolygon, pos:Vector2, queued_instance:Dictionar
 	elif pattern.forced_angle != 0.0:
 		queued_instance["rotation"] = pattern.forced_angle
 
-func create_bullet_instance_dict(queued_instance:Dictionary, bullet_props:Dictionary, pattern:NavigationPolygon, l:int):
+func create_bullet_instance_dict(queued_instance:Dictionary, bullet_props:Dictionary, pattern:NavigationPolygon):
 	queued_instance["shape_disabled"] = true
 	#if pattern.bullet in no_culling_for: queued_instance["no_culling"] = true
-	queued_instance["speed"] = bullet_props.speed + pattern.layer_speed_offset*l
+	queued_instance["speed"] = bullet_props.speed
 	queued_instance["vel"] = Vector2()
 	if bullet_props.has("groups"): queued_instance["groups"] = bullet_props.get("groups")
 	if pattern.follows_parent: queued_instance["follows_parent"] = true
 	return queued_instance
 
-func set_spawn_data(queued_instance:Dictionary, bullet_props:Dictionary, pattern:NavigationPolygon, l:int, i:int, ori_angle:float):
+func set_spawn_data(queued_instance:Dictionary, bullet_props:Dictionary, pattern:NavigationPolygon, i:int, ori_angle:float):
 	var angle:float
 	match pattern.resource_name:
 		"PatternCircle":
-			angle = (pattern.angle_total/pattern.nbr)*i + pattern.angle_decal + pattern.layer_pos_offset*l
+			angle = (pattern.angle_total/pattern.nbr)*i + pattern.angle_decal
 			queued_instance["spawn_pos"] = Vector2(cos(angle)*pattern.radius,sin(angle)*pattern.radius).rotated(pattern.pattern_angle)
-			queued_instance["rotation"] = angle + bullet_props.angle + pattern.layer_angle_offset*l + ori_angle
+			queued_instance["rotation"] = angle + bullet_props.angle + ori_angle
 		"PatternLine":
 			queued_instance["spawn_pos"] = Vector2(pattern.offset.x*(-abs(pattern.center-i-1))-pattern.nbr/2*pattern.offset.x, pattern.offset.y*i-pattern.nbr/2*pattern.offset.y).rotated(pattern.pattern_angle)
-			queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + pattern.pattern_angle + ori_angle
+			queued_instance["rotation"] = bullet_props.angle + pattern.pattern_angle + ori_angle
 		"PatternOne":
 			queued_instance["spawn_pos"] = Vector2()
-			queued_instance["rotation"] = bullet_props.angle + pattern.layer_angle_offset*l + ori_angle
+			queued_instance["rotation"] = bullet_props.angle + ori_angle
 		"PatternCustomShape","PatternCustomPoints":
 			queued_instance["spawn_pos"] = pattern.pos[i]
-			queued_instance["rotation"] = bullet_props.angle + pattern.angles[i] + pattern.layer_angle_offset*l + ori_angle
+			queued_instance["rotation"] = bullet_props.angle + pattern.angles[i] + ori_angle
 		"PatternCustomArea":
 			queued_instance["spawn_pos"] = pattern.pos[randi()%pattern.pooling][i]
 			queued_instance["rotation"] = bullet_props.angle + ori_angle
@@ -383,58 +383,56 @@ func _thread_spawn(spawner, id:String, shared_area:String="0"):
 	var pos:Vector2; var ori_angle:float;
 	var bullet_props:Dictionary; var queued_instance:Dictionary; var bID; var is_object:bool; var is_bullet_node:bool
 	while iter != 0:
-		for l in pattern.layer_nbr:
-			if spawner == null: return
-			if spawner is Node2D:
-				ori_angle = spawner.rotation
-				pos = spawner.global_position
-			elif spawner is Dictionary:
-				pos = spawner["position"]
-				ori_angle = spawner["rotation"]
-			else: push_error("spawner isn't a Node2D or a bullet RID")
+		if spawner == null: return
+		if spawner is Node2D:
+			ori_angle = spawner.rotation
+			pos = spawner.global_position
+		elif spawner is Dictionary:
+			pos = spawner["position"]
+			ori_angle = spawner["rotation"]
+		else: push_error("spawner isn't a Node2D or a bullet RID")
+		
+		bullet_props = arrayProps[pattern.bullet]
+		if bullet_props.get("has_random",false): bullet_props = create_random_props(bullet_props)
+		
+		is_object = bullet_props.has("instance_id")
+		is_bullet_node = (is_object and bullet_props.has("speed"))
+		for i in pattern.nbr:
+			queued_instance = {}
+			queued_instance["shared_area"] = shared_area_node
+			queued_instance["props"] = bullet_props
+			queued_instance["source_node"] = spawner
+			queued_instance["state"] = BState.Unactive
+			if not is_object:
+				queued_instance["colID"] = bullet_props.get("anim_spawn_collision", bullet_props["anim_idle_collision"])
+				queued_instance = create_bullet_instance_dict(queued_instance, bullet_props, pattern)
+			elif is_bullet_node: queued_instance = create_bullet_instance_dict(queued_instance, bullet_props, pattern)
 			
-			bullet_props = arrayProps[pattern.bullet]
-			if bullet_props.get("has_random",false): bullet_props = create_random_props(bullet_props)
+			set_spawn_data(queued_instance, bullet_props, pattern, i, ori_angle)
 			
-			is_object = bullet_props.has("instance_id")
-			is_bullet_node = (is_object and bullet_props.has("speed"))
-			for i in pattern.nbr:
-				queued_instance = {}
-				queued_instance["shared_area"] = shared_area_node
-				queued_instance["props"] = bullet_props
-				queued_instance["source_node"] = spawner
-				queued_instance["state"] = BState.Unactive
-				if not is_object:
-					queued_instance["colID"] = bullet_props.get("anim_spawn_collision", bullet_props["anim_idle_collision"])
-					queued_instance = create_bullet_instance_dict(queued_instance, bullet_props, pattern, l)
-				elif is_bullet_node: queued_instance = create_bullet_instance_dict(queued_instance, bullet_props, pattern, l)
-				
-				set_spawn_data(queued_instance, bullet_props, pattern, l, i, ori_angle)
-				
-				if not bullet_props.get("fixed_rotation", false):
-					set_angle(pattern, pos, queued_instance)
-				else: queued_instance["rotation"] = 0
-				
-				if pattern.get("wait_tween_momentum") > 0:
-					var tw_endpos = queued_instance["spawn_pos"]+pos+Vector2(pattern["wait_tween_length"], 0).rotated(PI+queued_instance["rotation"])
-					queued_instance["momentum_data"] = [pattern["wait_tween_momentum"]-1, tw_endpos, pattern["wait_tween_time"]]
-				
-				bID = wake_from_pool(pattern.bullet, queued_instance, shared_area, is_object)
-				bullets.append(bID)
-				poolBullets[bID] = queued_instance
-				
-				if is_object:
-					if is_bullet_node: bID.b = queued_instance
-					
-					if bullet_props.has("overwrite_groups"):
-						for g in bID.get_groups():
-							bID.remove_group(g)
-					for g in bullet_props.get("groups", []):
-						bID.add_to_group(g)
-				
-			_plan_spawning(pattern, bullets)
+			if not bullet_props.get("fixed_rotation", false):
+				set_angle(pattern, pos, queued_instance)
+			else: queued_instance["rotation"] = 0
 			
-			if l < pattern.layer_nbr - 1: await get_tree().create_timer(pattern.layer_cooldown_spawn).timeout
+			if pattern.get("wait_tween_momentum") > 0:
+				var tw_endpos = queued_instance["spawn_pos"]+pos+Vector2(pattern["wait_tween_length"], 0).rotated(PI+queued_instance["rotation"])
+				queued_instance["momentum_data"] = [pattern["wait_tween_momentum"]-1, tw_endpos, pattern["wait_tween_time"]]
+			
+			bID = wake_from_pool(pattern.bullet, queued_instance, shared_area, is_object)
+			bullets.append(bID)
+			poolBullets[bID] = queued_instance
+			
+			if is_object:
+				if is_bullet_node: bID.b = queued_instance
+				
+				if bullet_props.has("overwrite_groups"):
+					for g in bID.get_groups():
+						bID.remove_group(g)
+				for g in bullet_props.get("groups", []):
+					bID.add_to_group(g)
+			
+		_plan_spawning(pattern, bullets)
+		
 		if iter > 0: iter -= 1
 		await get_tree().create_timer(pattern.cooldown_spawn).timeout
 		if local_reset_counter != global_reset_counter: return
@@ -1059,7 +1057,9 @@ func get_variation(mean:float, variance:float, limit_down=0, limit_up=0):
 		return min(max(RAND.randfn(mean,variance),limit_down), limit_up)
 	elif limit_down != 0: return max(RAND.randfn(mean,variance),limit_down)
 	elif limit_up != 0: return min(RAND.randfn(mean,variance),limit_up)
-	else: return RAND.randfn(mean,variance)
+	else:
+		print(mean,variance," ",RAND.randfn(mean,variance))
+		return RAND.randfn(mean,variance)
 
 func get_choice_string(list:String):
 	var res:Array = list.split(";",false)
@@ -1290,15 +1290,16 @@ func bounce(B:Dictionary, shared_area:Area2D):
 #§§§§§§§§§§§§§ RANDOMISATION §§§§§§§§§§§§§
 
 func create_random_props(original:Dictionary) -> Dictionary:
-	var r_name:String; var res:Dictionary;
+	var r_name:String; var res:Dictionary = original;
 	var choice:Array; var variation:Vector3;
 	for p in original.keys():
 		r_name = match_rand_prop(p)
 		if original.has(r_name+"_choice"):
 			choice = original[r_name+"_choice"]
 			variation = original.get(r_name+"_variation",Vector3(0,0,0))
-			res[p] = get_variation(choice[randi()%choice.size()],variation.x,variation.y,variation.z)
+			res[p] = get_variation(choice[randi()%choice.size()].to_float(),variation.x,variation.y,variation.z)
 		elif original.has(r_name+"_variation"):
+			variation = original.get(r_name+"_variation",Vector3(0,0,0))
 			res[p] = get_variation(original[p],variation.x,variation.y,variation.z)
 		elif original.has(r_name+"_chance"):
 			res[p] = randf_range(0,1) < original[r_name+"_chance"]
