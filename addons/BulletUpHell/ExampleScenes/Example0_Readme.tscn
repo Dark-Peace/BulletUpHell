@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://bblnxejsh5044"]
+
+[node name="Example-readme" type="Node2D"]
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Thanks for downloading BulletUpHell
+
+Documentation is here : https://rebrand.ly/Dark-Peace-Godot-Plugins
+
+The premium version of the plugin, with extra features, optimisation, improved  API and more future updates is available here:
+
+
+"
