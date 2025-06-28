@@ -376,7 +376,7 @@ func spawn(spawner, id:String, shared_area:String="0"):
 	while iter != 0:
 		if spawner == null: return
 		if spawner is Node2D:
-			ori_angle = spawner.rotation
+			ori_angle = spawner.global_rotation
 			pos = spawner.global_position
 		elif spawner is Dictionary:
 			pos = spawner["position"]
@@ -733,6 +733,10 @@ func bullet_movement():
 				delete_bullet(b)
 				_apply_movement(B, b, props)
 				continue
+		if props.has("death_outside_box") and not props["death_outside_box"].has_point(B["position"]):
+			delete_bullet(b)
+			_apply_movement(B, b, props)
+			continue
 		if B.has("rot_index"): B["rot_index"] += props["spec_rotating_speed"]
 
 		#scale curve
