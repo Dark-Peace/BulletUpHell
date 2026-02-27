@@ -617,8 +617,7 @@ func init_special_variables(b:Dictionary, rid):
 		b["homing_counter"] = int(0)
 	if bp.has("curve"):
 		b["curve_counter"] = float(0.0)
-		if bp["a_curve_movement"] in [CURVE_TYPE.LoopFromStart,CURVE_TYPE.LoopFromEnd]:
-			b["curve_start"] = bp["curve"].get_point_position(0)
+		b["curve_start"] = bp["curve"].get_point_position(0)
 	if bp.has("death_after_time"): b["death_counter"] = float(0.0)
 	if bp.has("trigger_container"):
 		b['trig_container'] = container(bp["trigger_container"])
