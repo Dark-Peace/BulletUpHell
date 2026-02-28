@@ -23,7 +23,7 @@ Tutorial, installation steps and documentation below the screenshots. (lags on t
 
 Video tutorial to get started : [tuto](https://youtu.be/YG4KW3iu1YA)
 
-For the installation and the documentation of all my plugins, check this : [https://rebrand.ly/Dark-Peace-Godot-Plugins](https://rebrand.ly/Dark-Peace-Godot-Plugins)
+For the installation and the documentation, check this : [https://rebrand.ly/Dark-Peace-Godot-Plugins](https://r-g-b.notion.site/BulletUpHell-3153e69c5faa810baa55e8dc0be8f9e2)
 
 I'll also post complete tutorials on my Youtube channel when I'll have the time so consider subscribing to not miss any news !
 [My youtube channel](https://www.youtube.com/@Dark_Peace)
