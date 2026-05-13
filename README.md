@@ -6,7 +6,7 @@ BulletUpHell is the most feature-packed BulletHell Engine in the world. It's a p
 
 As a BulletHell dev myself, my aim is to create a plugin able to recreate ALL the attack patterns present in your favorite bullethell games. For that, I researched all of the attacks in games like Enter the Gungeon and Binding of Isaac and implemented the necessary features to recreate them all with easiness of use and flexibility in mind. You'll have all the tools you need to make a BulletHell game. It takes care of everything related to bullet spawning : patterns, bullet properties, event triggering,... Features include complex bullet movement (from math equations to custom drawn paths), advanced homing features, built-in animation and sound manager, ability to randomise everything, laser beams, and much more ! 
 
-You want even more than the best Bullethell engine ? Then go for the improved version : [BulletUpHell BLAST](https://bottled-up-studio.itch.io/godot-bullethell-plugin). Many exclusive features, more updates, improved API, improved optimisation,... The list of exclusive stuff can be seen here : https://rebrand.ly/BulletUpHell-BLAST.
+You want even more than the best Bullethell engine ? Then go for the improved version : [BulletUpHell BLAST](https://bottled-up-studio.itch.io/godot-bullethell-plugin). Many exclusive features, more updates, improved API, improved optimisation,... The list of exclusive stuff can be seen here : https://dark-peace.nekoweb.org/bullet-up-hell.
 
 Here is the official trailer : https://youtu.be/L9ztZr9Ku2Q
 
@@ -23,7 +23,7 @@ Tutorial, installation steps and documentation below the screenshots. (lags on t
 
 Video tutorial to get started : [tuto](https://youtu.be/YG4KW3iu1YA)
 
-For the installation and the documentation, check this : [https://rebrand.ly/Dark-Peace-Godot-Plugins](https://r-g-b.notion.site/BulletUpHell-3153e69c5faa810baa55e8dc0be8f9e2)
+For the installation and the documentation, check this : https://dark-peace.nekoweb.org/docs/bullet-up-hell/Install%20and%20update/
 
 I'll also post complete tutorials on my Youtube channel when I'll have the time so consider subscribing to not miss any news !
 [My youtube channel](https://www.youtube.com/@Dark_Peace)
